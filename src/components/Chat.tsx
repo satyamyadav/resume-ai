@@ -1,23 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiSend, FiCpu, FiPlus } from 'react-icons/fi';
+import { FiCpu, FiPlus } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import { useLatexContext } from '../context/LatexContext';
 import './Shimmer.css';
 import ChatInput from './ChatInput';
 
 type Message = { role: 'user' | 'assistant'; content: string; loading?: boolean };
-
-const mockMessages: Message[] = [
-  { role: 'assistant', content: 'Hello! How can I help you?' },
-  { role: 'user', content: 'I need help with my resume.' },
-  { role: 'assistant', content: 'Sure! Please paste your resume code here.' },
-  { role: 'user', content: 'Here is my resume code: \n\\documentclass{resume}\n\\begin{document}\n\\section*{Education}\n\\end{document}' },
-  { role: 'assistant', content: 'Resume updated.' },
-  { role: 'assistant', content: 'Here is your resume code\n\\documentclass{resume}\n\\begin{document}\n\\section*{Education}\n\\end{document}\nEnd of resume code' },
-];
-
 
 const ChatMessage = ({ role, content, loading }: Message) => {
   if (loading) {
@@ -94,7 +84,7 @@ export default function Chat() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const updatedMessages = [...messages, { role: 'user', content: input }];
+    const updatedMessages: Message[] = [...messages, { role: 'user', content: input }];
     setMessages(updatedMessages);
     setInput('');
     setLoading(true);
@@ -160,7 +150,7 @@ export default function Chat() {
         <ChatInput
           value={input}
           sendMessage={sendMessage}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setInput(e.target.value)}
           placeholder="Type your message here..."
         />
 

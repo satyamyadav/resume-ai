@@ -1,8 +1,15 @@
 import React, { useRef } from 'react';
 import { FiSend } from 'react-icons/fi';
 
-const ChatInput = ({ value, onChange, placeholder, sendMessage }) => {
-    const textareaRef = useRef(null);
+interface ChatInputProps {
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    placeholder: string;
+    sendMessage: () => void;
+}
+
+const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, placeholder, sendMessage }) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Automatically resize the textarea on input
     const handleInput = () => {
@@ -18,7 +25,7 @@ const ChatInput = ({ value, onChange, placeholder, sendMessage }) => {
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.style.height = 'auto'; // Reset height to calculate scrollHeight
-            
+
         }
     };
 
@@ -33,14 +40,6 @@ const ChatInput = ({ value, onChange, placeholder, sendMessage }) => {
 
     return (
         <div className="flex items-center border-t p-3">
-            {/* <textarea
-            className="flex-grow p-3 rounded-xl outline-none border resize-y h-auto max-h-[200px] overflow-y-auto"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message here..."
-            
-          /> */}
             <textarea
                 ref={textareaRef}
                 value={value}
