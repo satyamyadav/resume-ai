@@ -20,7 +20,7 @@ export default function EditorPage() {
       window.localStorage.setItem('resumeId', newId);
       setResumeId(newId);
     }
-  } , [latex, resumeId, setResumeId]);
+  }, [latex, resumeId, setResumeId]);
 
   const compileLatex = async () => {
     setIsCompiling(true);
@@ -28,11 +28,13 @@ export default function EditorPage() {
       const res = await axios.post('/api/compile', { latex, name: resumeId });
       setPdfUrl(res.data.pdfUrl); // API returns the URL of the compiled PDF
     } catch (error) {
-      const errMessage = axios.isAxiosError(error) && error.response?.data?.message?.split('LaTeX Error:')[1] || 'Error compiling LaTeX';
-      setCompilation({ loading: false, error: true, success: false, latex, errorText: errMessage });
+      const errMessage = axios.isAxiosError(error) && error.response?.data?.message?.split('LaTeX Error:')[1] || null;
+      if (errMessage) {
+        setCompilation({ loading: false, error: true, success: false, latex, errorText: errMessage });
+      }
       console.error('Error compiling LaTeX:', error);
     } finally {
-      
+
       setIsCompiling(false);
       setRandom(Date.now()); // Update to refresh iframe key
     }
