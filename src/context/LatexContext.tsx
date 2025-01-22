@@ -32,25 +32,10 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     errorText: '',
   });
 
-  const fetchLatexContent = async (id: string) => {
-    try {
-      const response = await fetch(`/api/resume/${id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLatex(data.latex);
-        setResumeId(id);
-      } else {
-        console.error('Failed to fetch latex content');
-      }
-    } catch (error) {
-      console.error('Error fetching latex content:', error);
-    }
-  };
-
   useEffect(() => {
-    const storedId = window.localStorage.getItem('resumeId');
-    if (storedId?.length) {
-      fetchLatexContent(storedId);
+    const storedLatex = window.localStorage.getItem('latex');
+    if(storedLatex && storedLatex.length) {
+      setLatex(JSON.parse(storedLatex));
     }
   }, [])
 

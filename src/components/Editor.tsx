@@ -5,6 +5,25 @@ import axios from 'axios';
 import { FiX, FiCode } from 'react-icons/fi'; // Icon for the toggle button
 import { AiOutlineFilePdf } from 'react-icons/ai';
 import { useLatexContext } from '@/context/LatexContext';
+import { PdfTeXEngine } from '@/components/PdfLatex';
+
+const engine = new PdfTeXEngine();
+engine.loadEngine().then(() => {
+  console.log('Engine loaded');
+  // engine.writeMemFSFile('main.tex', `\\documentclass{article}
+  // \\begin{document}
+  // Hello, world!
+  // \\end{document}`);
+  // engine.compileLaTeX().then(({ pdf }) => {
+  //   // const pdfBlob = new Blob([pdf], {type: 'application/pdf'});
+  //   // const pdfUrl = URL.createObjectURL(pdfBlob);
+  //   // window.open(pdfUrl);
+  // });
+
+}).catch((err) => {
+  console.error('Engine failed to load', err);
+});
+
 
 export default function EditorPage() {
   const { latex, setLatex, resumeId, setResumeId, compilation, setCompilation } = useLatexContext();
@@ -14,48 +33,55 @@ export default function EditorPage() {
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
 
-  useEffect(() => {
-    if (!resumeId?.length && latex?.length) {
-      const newId = Date.now().toString();
-      window.localStorage.setItem('resumeId', newId);
-      setResumeId(newId);
-    }
-  }, [latex, resumeId, setResumeId]);
-
-  const compileLatex = async () => {
-    setIsCompiling(true);
-    try {
-      const res = await axios.post('/api/compile', { latex, name: resumeId });
-      setPdfUrl(res.data.pdfUrl); // API returns the URL of the compiled PDF
-    } catch (error) {
-      const errMessage = axios.isAxiosError(error) && error.response?.data?.message?.split('LaTeX Error:')[1] || null;
-      if (errMessage) {
-        setCompilation({ loading: false, error: true, success: false, latex, errorText: errMessage });
-      }
-      console.error('Error compiling LaTeX:', error);
-    } finally {
-
-      setIsCompiling(false);
-      setRandom(Date.now()); // Update to refresh iframe key
-    }
-  };
 
   useEffect(() => {
-    if (latex && resumeId) {
+    if (latex.length) {
       if (debounceTimeout) {
         clearTimeout(debounceTimeout);
       }
       setDebounceTimeout(setTimeout(() => {
+        window.localStorage.setItem('latex', JSON.stringify(latex));
         compileLatex();
       }, 1000));
     }
-  }, [latex, resumeId]);
+  }, [latex]);
+
+  const compileLatex = async () => {
+    setIsCompiling(true);
+    if (engine.isReady()) {
+      engine.writeMemFSFile('main.tex', latex);
+      engine.compileLaTeX().then((res) => {
+        if (res.status !== 0) {
+          console.error('Compilation failed:', res);
+          return;
+        }
+        console.log('Compilation result:', res);
+        const pdfBlob = new Blob([res.pdf], { type: 'application/pdf' });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        setPdfUrl(pdfUrl);
+      })
+        .catch((err) => {
+          console.error('Error compiling LaTeX:', err);
+          // const errMessage = axios.isAxiosError(error) && error.response?.data?.message?.split('LaTeX Error:')[1] || null;
+          // if (errMessage) {
+          //   setCompilation({ loading: false, error: true, success: false, latex, errorText: errMessage });
+          // }
+          // console.error('Error compiling LaTeX:', error);
+        })
+        .finally(() => {
+          setIsCompiling(false);
+        });
+
+    }
+  };
+
+
 
   const handleEditorChange = (value: string | undefined) => {
     setLatex(value || '');
   };
 
-  if (!resumeId?.length) {
+  if (!latex?.length) {
     return null;
   }
 
@@ -111,11 +137,15 @@ export default function EditorPage() {
           <div className="p-2 border-b flex justify-between items-center text-gray-500">
             {!editorVisible && (
               <button
-                className="gray"
+                className="gray flex items-center gap-2 whitespace-nowrap"
                 onClick={() => setEditorVisible(!editorVisible)}
                 aria-label="Toggle Editor"
               >
-                <FiCode title='Show Code' size={20} />
+                <FiCode title='Show Code' size={20} /> 
+                <span>
+                View Code
+
+                </span>
               </button>
             )}
 
@@ -124,22 +154,22 @@ export default function EditorPage() {
             <div></div>
           </div>
           {/* PDF Preview */}
-          <div className="w-full h-full flex items-center justify-center">
-            {compilation.error && compilation.loading ? (
-              <div>Fixing errors in code...</div>
-            ) : isCompiling ? (
-              <div className="loader">Compiling...</div>
-            ) : (
-              !!pdfUrl.length && (
-                <embed
-                  key={random}
-                  src={pdfUrl}
-                  className="w-full h-full"
-                  title="PDF Preview"
-                  type='application/pdf'
-                />
-              )
+          <div className="w-full h-full flex items-center justify-center p-3">
+            {isCompiling && (
+              <div className="rounded-b-lg absolute bottom-0 left-0 right-0 p-4 bg-black/40 backdrop-blur-sm text-white text-center">
+                Generating resume in PDF...
+              </div>
             )}
+            {!!pdfUrl.length && (
+              <embed
+                key={random}
+                src={pdfUrl}
+                className="w-full h-full overflow-auto"
+                title="PDF Preview"
+                type='application/pdf'
+              />
+            )}
+
           </div>
 
         </div>
