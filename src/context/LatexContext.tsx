@@ -1,6 +1,5 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
 
 type TCompilation = {
   loading: boolean;
@@ -39,40 +38,37 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  const updateLatex = async (props: TCompilation) => {
-    try {
-      setCompilation({ ...props, loading: true });
 
-      const res = await axios.post('/api/review', {
-        messages: [{
-          role: 'user', content: `
-        Fix the error in the following LaTeX code:
-        ${latex}
-        Error: ${props.errorText}
-        `}]
-      });
-      const reply = res.data.reply;
+  // useEffect(() => {
+  //   if (compilation.error) {
+  //     try {
+  //       setCompilation({ ...props, loading: true });
 
-      const latexMatch = reply.match(/ZZZCODEZZZ([\s\S]*?)ZZZCODEZZZ/);
-      if (latexMatch) {
-        const newLatex = latexMatch[1].trim();
-        setLatex(newLatex);
-        setCompilation({ loading: false, error: false, success: true, latex: newLatex, errorText: '' });
-      } else {
+  //       const res = await axios.post('/api/review', {
+  //         messages: [{
+  //           role: 'user', content: `
+  //       Fix the error in the following LaTeX code:
+  //       ${latex}
+  //       Error: ${props.errorText}
+  //       `}]
+  //       });
+  //       const reply = res.data.reply;
 
-        setCompilation({ loading: false, error: false, success: true, latex, errorText: '' });
-      }
-    } catch (error) {
-      console.error('Error communicating with AI:', error);
-      setCompilation({ loading: false, error: false, success: false, latex, errorText: '' });
-    }
-  };
+  //       const latexMatch = reply.match(/ZZZCODEZZZ([\s\S]*?)ZZZCODEZZZ/);
+  //       if (latexMatch) {
+  //         const newLatex = latexMatch[1].trim();
+  //         setLatex(newLatex);
+  //         setCompilation({ loading: false, error: false, success: true, latex: newLatex, errorText: '' });
+  //       } else {
 
-  useEffect(() => {
-    if (compilation.error) {
-      updateLatex(compilation);
-    }
-  }, [compilation.error]);
+  //         setCompilation({ loading: false, error: false, success: true, latex, errorText: '' });
+  //       }
+  //     } catch (error) {
+  //       console.error('Error communicating with AI:', error);
+  //       setCompilation({ loading: false, error: false, success: false, latex, errorText: '' });
+  //     }
+  //   }
+  // }, [compilation.error, latex]);
 
   return (
     <LatexContext.Provider value={{ latex, setLatex, resumeId, setResumeId, compilation, setCompilation }}>

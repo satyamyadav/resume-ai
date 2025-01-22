@@ -42,11 +42,11 @@ export class PdfTeXEngine {
             throw new Error('Other instance is running, abort()');
         }
         this.latexWorkerStatus = EngineStatus.Init;
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             this.latexWorker = new Worker(ENGINE_PATH);
-            this.latexWorker.onmessage = (ev: any) => {
-                const data: any = ev['data'];
-                const cmd: string = data['result'] as string;
+            this.latexWorker.onmessage = (ev: MessageEvent) => {
+                const data = ev.data as { result: string };
+                const cmd: string = data.result;
                 if (cmd === 'ok') {
                     this.latexWorkerStatus = EngineStatus.Ready;
                     resolve();
@@ -56,10 +56,7 @@ export class PdfTeXEngine {
                 }
             };
         });
-        this.latexWorker!.onmessage = (_: any) => {
-        };
-        this.latexWorker!.onerror = (_: any) => {
-        };
+        
     }
 
     public isReady(): boolean {
@@ -76,9 +73,9 @@ export class PdfTeXEngine {
         this.checkEngineStatus();
         this.latexWorkerStatus = EngineStatus.Busy;
         const start_compile_time = performance.now();
-        const res: CompileResult = await new Promise((resolve, _) => {
-            this.latexWorker!.onmessage = (ev: any) => {
-                const data: any = ev['data'];
+        const res: CompileResult = await new Promise((resolve) => {
+            this.latexWorker!.onmessage = (ev: MessageEvent) => {
+                const data = ev.data as { cmd: string, result: string, log: string, status: number, pdf?: ArrayBuffer };
                 const cmd: string = data['cmd'] as string;
                 if (cmd !== "compile") return;
                 const result: string = data['result'] as string;
@@ -90,7 +87,7 @@ export class PdfTeXEngine {
                 nice_report.status = status;
                 nice_report.log = log;
                 if (result === 'ok') {
-                    const pdf: Uint8Array = new Uint8Array(data['pdf']);
+                    const pdf: Uint8Array = data['pdf'] ? new Uint8Array(data['pdf']) : new Uint8Array();
                     nice_report.pdf = pdf;
                 }
                 resolve(nice_report);
@@ -98,8 +95,7 @@ export class PdfTeXEngine {
             this.latexWorker!.postMessage({ 'cmd': 'compilelatex' });
             console.log('Engine compilation start');
         });
-        this.latexWorker!.onmessage = (_: any) => {
-        };
+        
 
         return res;
     }
@@ -108,9 +104,9 @@ export class PdfTeXEngine {
     public async compileFormat(): Promise<void> {
         this.checkEngineStatus();
         this.latexWorkerStatus = EngineStatus.Busy;
-        await new Promise((resolve, reject) => {
-            this.latexWorker!.onmessage = (ev: any) => {
-                const data: any = ev['data'];
+        await new Promise<void>((resolve, reject) => {
+            this.latexWorker!.onmessage = (ev: MessageEvent) => {
+                const data = ev.data as { cmd: string, result: string, log: string, pdf?: ArrayBuffer };
                 const cmd: string = data['cmd'] as string;
                 if (cmd !== "compile") return;
                 const result: string = data['result'] as string;
@@ -119,19 +115,20 @@ export class PdfTeXEngine {
                 this.latexWorkerStatus = EngineStatus.Ready;
                 if (result === 'ok') {
                     const formatArray = data['pdf']; /* PDF for result */
-                    const formatBlob = new Blob([formatArray], { type: 'application/octet-stream' });
-                    const formatURL = URL.createObjectURL(formatBlob);
-                    setTimeout(() => { URL.revokeObjectURL(formatURL); }, 30000);
-                    console.log('Download format file via ' + formatURL);
-                    resolve();
+                    if (formatArray) {
+                        const formatBlob = new Blob([formatArray], { type: 'application/octet-stream' });
+                        const formatURL = URL.createObjectURL(formatBlob);
+                        setTimeout(() => { URL.revokeObjectURL(formatURL); }, 30000);
+                        console.log('Download format file via ' + formatURL);
+                        resolve();
+                    }
                 } else {
                     reject(log);
                 }
             };
             this.latexWorker!.postMessage({ 'cmd': 'compileformat' });
         });
-        this.latexWorker!.onmessage = (_: any) => {
-        };
+        
     }
 
     public setEngineMainFile(filename: string): void {
