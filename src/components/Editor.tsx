@@ -1,100 +1,45 @@
 'use client';
 import Editor from '@monaco-editor/react';
 import React, { useEffect, useState } from 'react';
-import { FiX, FiCode } from 'react-icons/fi'; // Icon for the toggle button
+import { FiX } from 'react-icons/fi'; // Icon for the toggle button
 import { AiOutlineFilePdf } from 'react-icons/ai';
 import { useLatexContext } from '@/context/LatexContext';
-import { PdfTeXEngine } from '@/components/PdfLatex';
-
-const engine = new PdfTeXEngine();
-
-
+import { compile } from '@/components/Templates';
 
 export default function EditorPage() {
-  const { latex, setLatex, resumeId } = useLatexContext();
-  const [pdfUrl, setPdfUrl] = useState(resumeId ? `/resume/${resumeId}.pdf` : ''); // State for PDF URL
-  const [editorVisible, setEditorVisible] = useState(false); // State for editor visibility
-  const [isCompiling, setIsCompiling] = useState(false);
+  const { latex, setLatex } = useLatexContext();
+  const [editorVisible, setEditorVisible] = useState(true); // State for editor visibility
+  const [resumeHtml, setResumeHtml] = useState('');
 
 
   useEffect(() => {
-    engine.loadEngine().then(() => {
-      console.log('Engine loaded');
-      // engine.writeMemFSFile('main.tex', `\\documentclass{article}
-      // \\begin{document}
-      // Hello, world!
-      // \\end{document}`);
-      // engine.compileLaTeX().then(({ pdf }) => {
-      //   // const pdfBlob = new Blob([pdf], {type: 'application/pdf'});
-      //   // const pdfUrl = URL.createObjectURL(pdfBlob);
-      //   // window.open(pdfUrl);
-      // });
-
-    }).catch((err) => {
-      console.error('Engine failed to load', err);
-    });
-  }, [])
-
-  const compileLatex = React.useCallback(async () => {
-    setIsCompiling(true);
-    if (engine.isReady()) {
-      engine.writeMemFSFile('main.tex', latex);
-      engine.compileLaTeX().then((res) => {
-        if (res.status !== 0) {
-          console.error('Compilation failed:', res);
-          return;
-        }
-        console.log('Compilation result:', res);
-        if (res.pdf) {
-          const pdfBlob = new Blob([res.pdf], { type: 'application/pdf' });
-          const pdfUrl = URL.createObjectURL(pdfBlob);
-          setPdfUrl(pdfUrl);
-        } else {
-          console.error('PDF generation failed: pdf is undefined');
-        }
-      })
-        .catch((err) => {
-          console.error('Error compiling LaTeX:', err);
-          // const errMessage = axios.isAxiosError(error) && error.response?.data?.message?.split('LaTeX Error:')[1] || null;
-          // if (errMessage) {
-          //   setCompilation({ loading: false, error: true, success: false, latex, errorText: errMessage });
-          // }
-          // console.error('Error compiling LaTeX:', error);
-        })
-        .finally(() => {
-          setIsCompiling(false);
-        });
-
+    if (!latex.length) {
+      return;
     }
-  }, [latex]);
-
+    const data = JSON.parse(latex);
+    const result = compile(data);
+    console.log('Compiled result:', result);
+    setResumeHtml(result);
+  }, [latex])
 
   useEffect(() => {
     if (latex.length) {
-      compileLatex();
-      window.localStorage.setItem('latex', JSON.stringify(latex));
+      // compileLatex();
+      window.localStorage.setItem('latex', latex);
     }
-  }, [latex, compileLatex]);
-
-
-
+  }, [latex]);
 
   const handleEditorChange = (value: string | undefined) => {
-    setLatex(value || '');
+    setLatex(value || '{}');
   };
 
-  if (!latex?.length) {
-    return null;
-  }
 
   return (
-    <div className='w-[70%] p-4 h-full'>
-      <div className="h-full flex flex-row w-full flex-wrap bg-white rounded-xl">
+    
+      <div className="h-full flex flex-row w-full bg-gray-200">
         {/* Editor Section */}
         {editorVisible && (
           <>
-
-
             <div className='h-full w-1/2 border-r-4 relative'>
               <div className="p-2 border-b flex justify-between items-center text-gray-500">
                 <div>
@@ -105,7 +50,7 @@ export default function EditorPage() {
                 <div className='flex items-center'>
                   <button
                     className="gray ml-2"
-                    onClick={compileLatex}
+
                     aria-label="Compile Resume"
                     title="Compile Resume"
                   >
@@ -125,7 +70,7 @@ export default function EditorPage() {
               <div className="w-full px-2">
                 <Editor
                   theme="vs-code"
-                  language='latex'
+                  language='json'
                   height="70vh"
                   value={latex}
                   onChange={handleEditorChange}
@@ -135,46 +80,42 @@ export default function EditorPage() {
             </div>
           </>
         )}
-        <div className="relative flex-grow overflow-hidden h-full">
-          <div className="p-2 border-b flex justify-between items-center text-gray-500">
-            {!editorVisible && (
-              <button
-                className="gray flex items-center gap-2 whitespace-nowrap"
-                onClick={() => setEditorVisible(!editorVisible)}
-                aria-label="Toggle Editor"
-              >
-                <FiCode title='Show Code' size={20} />
-                <span>
-                  View Code
+        <div className="relative flex-grow overflow-hidden h-full border border-l-slate-300 border-l-4">
 
-                </span>
-              </button>
-            )}
-
-            <h3 className="w-full  text-center">Resume preview</h3>
-
-            <div></div>
-          </div>
-          {/* PDF Preview */}
-          <div className="w-full h-full flex items-center justify-center p-3">
-            {isCompiling && (
+           
+            {/* PDF Preview */}
+            <div className="w-full flex items-center justify-center p-3 overflow-auto relative">
+              {/* {isCompiling && (
               <div className="rounded-b-lg absolute bottom-0 left-0 right-0 p-4 bg-black/40 backdrop-blur-sm text-white text-center">
-                Generating resume in PDF...
+              Generating resume in PDF...
               </div>
-            )}
-            {!!pdfUrl.length && (
-              <embed
-                src={pdfUrl}
-                className="w-full h-full overflow-auto"
-                title="PDF Preview"
-                type='application/pdf'
-              />
-            )}
+              )} */}
+              {!!resumeHtml.length && (
+                <div className="w-full max-w-[800px] mx-auto relative">
+                  {/* A4 aspect ratio container */}
+                  <div className="w-full pb-[141.4%] relative">
+                    {/* Content container */}
+                    <div
+                      className="absolute top-0 left-0 w-full h-full bg-white shadow-lg"
+                      style={{
+                        padding: '20mm',
+                        overflow: 'auto'
+                      }}
+                    >
+                      <div
+                        className="w-full h-full"
+                        dangerouslySetInnerHTML={{ __html: resumeHtml }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-          </div>
+            </div>
 
+          
         </div>
       </div>
-    </div>
+    
   );
 }

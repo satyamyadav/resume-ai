@@ -111,7 +111,7 @@ export default function Chat() {
   const startFresh = () => {
     localStorage.removeItem('chatMessages');
     localStorage.removeItem('resumeId');
-    setLatex('');
+    setLatex('{}');
     setResumeId('');
     setMessages([{
       role: 'assistant',
