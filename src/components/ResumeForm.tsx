@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ResumeData, ResumeFormProps } from "../types";
+import AIHelper from "./AIHelper";
 
 const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   const [formData, setFormData] = useState<ResumeData>({
@@ -72,10 +73,18 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
     setFormData({ ...formData, skills: updatedSkills });
   };
 
-
+  const handleAIApply = (section: keyof ResumeData, index: number | undefined, suggestion: string) => {
+    if (section && index !== undefined) {
+      const updatedSection = [...formData[section] as Array<any>];
+      updatedSection[index] = { ...updatedSection[index], description: suggestion };
+      setFormData({ ...formData, [section]: updatedSection });
+    } else {
+      setFormData({ ...formData, summary: suggestion });
+    }
+  };
 
   return (
-    <form className="max-w-4xl mx-auto py-3 space-y-1">
+    <form className="max-w-4xl mx-auto py-3 space-y-2">
       {/* Personal Information */}
       <div className="space-y-1 rounded-md bg-gray-100 p-2">
         <h3 className="font-semibold text-gray-800">Personal Information</h3>
@@ -176,9 +185,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
 
       {/* Summary */}
       <div className="space-y-1 rounded-md bg-gray-100 p-2">
-        <h3 className=" font-semibold text-gray-800">Summary</h3>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center">
 
+          <h3 className=" font-semibold text-gray-800">Summary
+
+          </h3>
+          <AIHelper content={formData.summary} resumeData={formData} hierarchy="summary" onApply={(suggestion) => handleAIApply("summary", undefined, suggestion)} />
+        </div>
+        <div className="flex items-center space-x-2">
           <textarea
             id="summary"
             name="summary"
@@ -240,7 +254,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <label className="inline-block text-sm font-medium text-gray-700">Description</label>
+              <div className="flex items-center">
+                <label className="inline-block text-sm font-medium text-gray-700">Description</label>
+                <AIHelper content={exp.description} resumeData={formData} hierarchy={`experience[${index}].description`} onApply={(suggestion) => handleAIApply("experience", index, suggestion)} />
+              </div>
               <textarea
                 name="description"
                 value={exp.description}
@@ -249,7 +266,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
               />
             </div>
             <div className="flex items-start space-x-2">
-              <label className="inline-block text-sm font-medium text-gray-700">Responsibilities</label>
+              <div className="flex items-center">
+                <label className="inline-block text-sm font-medium text-gray-700">Responsibilities</label>
+                <AIHelper content={exp.responsibilities.join(",")} resumeData={formData} hierarchy={`experience[${index}].responsibilities`} onApply={(suggestion) => handleAIApply("experience", index, suggestion)} />
+              </div>
               <textarea
                 name="responsibilities"
                 value={exp.responsibilities.join(",")}
@@ -401,7 +421,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
               />
             </div>
             <div className="flex items-start space-x-2">
-              <label className="inline-block text-sm font-medium text-gray-700">Details</label>
+              <div className="flex items-center">
+                <label className="inline-block text-sm font-medium text-gray-700">Details</label>
+                <AIHelper content={project.details.join(",")} resumeData={formData} hierarchy={`projects[${index}].details`} onApply={(suggestion) => handleAIApply("projects", index, suggestion)} />
+              </div>
               <textarea
                 name="details"
                 value={project.details.join(",")}

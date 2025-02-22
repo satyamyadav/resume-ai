@@ -98,9 +98,6 @@ export default function Home() {
 
   };
 
-  const handleContinueEditing = () => {
-    router.push('/builder');
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-900 to-purple-900 flex flex-col justify-center items-center p-4">

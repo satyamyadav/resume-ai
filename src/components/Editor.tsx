@@ -27,12 +27,12 @@ export default function EditorPage() {
     }
   }, [latex]);
 
-  
+
   const handleFormUpdate = (data: ResumeData) => {
     setLatex(JSON.stringify(data, null, 2));
   }
 
-  if(!latex.length) {
+  if (!latex.length) {
     return <div>Loading...</div>
   }
 
@@ -40,21 +40,16 @@ export default function EditorPage() {
 
     <div className="h-full flex flex-row w-full">
       {/* Editor Section */}
-
-
-      <div className='h-full w-1/2 border-r-4 relative flex flex-col bg-white'>
-        <div className="p-2 border-b flex justify-center items-center text-gray-500">
-          <h3 className=" text-center">Resume Builder</h3>
+      <div className='h-full w-1/2 relative flex flex-col'>
+        <div className="p-2 flex justify-center items-center text-gray-500 shadow-lg border-b border-b-indigo-950">
+          <h2 className=" font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent text-center">Resume Builder</h2>
         </div>
-        <div className="w-full px-4 overflow-auto flex-grow">
+        <div className="w-full px-2 overflow-auto flex-grow">
           <ResumeForm aiData={JSON.parse(latex)} onFormUpdate={handleFormUpdate} />
         </div>
       </div>
 
-
-      <div className="relative flex-grow overflow-hidden h-full border border-l-slate-300 border-l-4">
-
-
+      <div className="relative flex-grow overflow-hidden h-full shadow-lg border-l border-l-indigo-950">
         {/* PDF Preview */}
         <div className="w-full flex items-center justify-center  overflow-auto relative">
           {/* {isCompiling && (
