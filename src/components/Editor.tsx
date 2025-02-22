@@ -33,7 +33,7 @@ export default function EditorPage() {
 
   return (
 
-    <div className="h-full flex flex-row w-full bg-gray-200">
+    <div className="h-full flex flex-row w-full">
       {/* Editor Section */}
 
 

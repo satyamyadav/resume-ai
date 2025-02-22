@@ -96,9 +96,6 @@ const defaultMessages: Message[] = [
   { role: 'assistant', content: 'Sure, I will help you with that.' }
 ];
 
-
-
-
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
