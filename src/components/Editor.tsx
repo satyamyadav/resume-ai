@@ -42,7 +42,7 @@ export default function EditorPage() {
       {/* Editor Section */}
 
 
-      <div className='h-full w-1/2 border-r-4 relative flex flex-col'>
+      <div className='h-full w-1/2 border-r-4 relative flex flex-col bg-white'>
         <div className="p-2 border-b flex justify-center items-center text-gray-500">
           <h3 className=" text-center">Resume Builder</h3>
         </div>
