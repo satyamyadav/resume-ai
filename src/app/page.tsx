@@ -29,6 +29,12 @@ import axios from 'axios';
  * 
  */
 
+/**
+ * 
+ * Add a loading state for the form submission
+ * add error handling for form submission
+ */
+
 export default function Home() {
   const router = useRouter();
   const [step, setStep] = useState(0); // 0: Start, 1: LinkedIn, 2: Manual Input
@@ -36,6 +42,8 @@ export default function Home() {
     name: '',
     role: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -44,12 +52,17 @@ export default function Home() {
   const handleLinkedIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const response = await axios.post('/api/completion/linkedin', { /* LinkedIn data */ });
       window.localStorage.setItem('resume', JSON.stringify(response.data));
       router.push('/builder');
     } catch (error) {
       console.error('Error fetching LinkedIn resume:', error);
+      setError('Error fetching LinkedIn resume');
+    } finally {
+      setLoading(false);
     }
+
   };
 
   const handleSkip = () => {
@@ -60,14 +73,21 @@ export default function Home() {
     e.preventDefault();
     const { name, role } = userData;
     try {
+      setLoading(true);
       const response = await axios.post('/api/completion/manual', { name, role });
-      window.localStorage.setItem('resume', JSON.stringify(response.data));
+      window.localStorage.setItem('latex', JSON.stringify(response.data));
+      window.localStorage.setItem('suggestions', JSON.stringify({}));
       router.push('/builder');
     } catch (error) {
       console.error('Error fetching manual resume:', error);
+      setError('Error fetching manual resume');
+    } finally {
+      setLoading(false);
     }
 
   };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-900 to-purple-900 flex flex-col justify-center items-center p-4">
@@ -118,6 +138,11 @@ export default function Home() {
             <FaLinkedin size={20} />
             <span>Connect with LinkedIn</span>
           </button>
+          {
+            error && (
+              <p className="text-red-400">{error}</p>
+            )
+          }
           <button
             onClick={handleSkip}
             className="w-full py-3 text-gray-400 hover:text-gray-200 transition duration-300"
@@ -170,15 +195,30 @@ export default function Home() {
                 required
               />
             </div>
+            {
+              error && (
+                <p className="text-red-400">{error}</p>
+              )
+            }
             <button
               type="submit"
               className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300"
+              disabled={loading}
             >
               Proceed to Builder
             </button>
           </form>
         </div>
       )}
+      {
+        loading &&
+        (
+          <div className="flex justify-center items-center p-3">
+            <p className='text-gray-300'>Getting your resume ready...</p>
+          </div>
+        )
+      }
+      
     </div>
   );
 }

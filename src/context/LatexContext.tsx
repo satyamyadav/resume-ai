@@ -84,7 +84,7 @@ const defaultJson = {
 
 
 export const LatexProvider = ({ children }: { children: ReactNode }) => {
-  const [latex, setLatex] = useState(JSON.stringify(defaultJson, null, 2));
+  const [latex, setLatex] = useState('');
   const [resumeId, setResumeId] = useState('');
   const [compilation, setCompilation] = useState({
     loading: false,
@@ -98,8 +98,16 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     const storedLatex = window.localStorage.getItem('latex');
     if(storedLatex && storedLatex.length) {
       setLatex(storedLatex);
+    } else {
+      setLatex(JSON.stringify(defaultJson, null, 2));
     }
   }, [])
+
+  useEffect(() => {
+    if (latex.length) {
+      window.localStorage.setItem('latex', latex);
+    }
+  } , [latex]);
 
 
   // useEffect(() => {

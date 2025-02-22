@@ -1,9 +1,10 @@
 'use client';
-import Editor from '@monaco-editor/react';
 import React, { useEffect, useState } from 'react';
 import { useLatexContext } from '@/context/LatexContext';
 import { compile } from '@/components/Templates';
 import ResumeForm from './ResumeForm';
+import { ResumeData } from "../types";
+
 
 export default function EditorPage() {
   const { latex, setLatex } = useLatexContext();
@@ -22,14 +23,18 @@ export default function EditorPage() {
   useEffect(() => {
     if (latex.length) {
       // compileLatex();
-      window.localStorage.setItem('latex', latex);
+      // window.localStorage.setItem('latex', latex);
     }
   }, [latex]);
 
-  const handleEditorChange = (value: string | undefined) => {
-    setLatex(value || '{}');
-  };
+  
+  const handleFormUpdate = (data: ResumeData) => {
+    setLatex(JSON.stringify(data, null, 2));
+  }
 
+  if(!latex.length) {
+    return <div>Loading...</div>
+  }
 
   return (
 
@@ -42,7 +47,7 @@ export default function EditorPage() {
           <h3 className=" text-center">Resume Builder</h3>
         </div>
         <div className="w-full px-4 overflow-auto flex-grow">
-          <ResumeForm aiData={JSON.parse(latex)} />
+          <ResumeForm aiData={JSON.parse(latex)} onFormUpdate={handleFormUpdate} />
         </div>
       </div>
 

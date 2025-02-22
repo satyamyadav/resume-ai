@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { ResumeData, ResumeFormProps, Experience, Education } from "../types";
+import { ResumeData, ResumeFormProps } from "../types";
 
-const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
+const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   const [formData, setFormData] = useState<ResumeData>({
     name: "",
-    email: "",
+    role: "",
+    address: "",
     phone: "",
-    linkedin: "",
+    email: "",
     github: "",
+    linkedin: "",
+    site: "",
     summary: "",
-    experience: [{ title: "", company: "", startDate: "", endDate: "", description: "" }],
+    skills: [{ category: "", list: "" }],
     education: [{ degree: "", institution: "", startDate: "", endDate: "", description: "" }],
-    skills: [],
+    experience: [{ title: "", company: "", startDate: "", endDate: "", description: "", responsibilities: [] }],
+    projects: [{ name: "", technologies: "", details: [] }],
+    portfolio: { github: "", linkedin: "" }
   });
 
   useEffect(() => {
@@ -19,6 +24,15 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
       setFormData(aiData);
     }
   }, [aiData]);
+
+  // debounce call to onFormUpdate when form data changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onFormUpdate(formData);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData, onFormUpdate]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -28,7 +42,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
     const { name, value } = e.target;
 
     if (section && index !== undefined) {
-      const updatedSection = [...formData[section] as Array<Experience | Education>];
+      const updatedSection = [...formData[section] as Array<any>];
       updatedSection[index] = { ...updatedSection[index], [name]: value };
       setFormData({ ...formData, [section]: updatedSection });
     } else {
@@ -38,33 +52,34 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
 
   const addEntry = (section: keyof ResumeData) => {
     const newEntry = section === "experience"
-      ? { title: "", company: "", startDate: "", endDate: "", description: "" }
-      : { degree: "", institution: "", startDate: "", endDate: "", description: "" };
+      ? { title: "", company: "", startDate: "", endDate: "", description: "", responsibilities: [] }
+      : section === "education"
+        ? { degree: "", institution: "", startDate: "", endDate: "", description: "" }
+        : section === "skills"
+          ? { category: "", list: "" }
+          : { name: "", technologies: "", details: [] };
 
     setFormData({
       ...formData,
-      [section]: [...formData[section] as Array<Experience | Education>, newEntry],
+      [section]: [...formData[section] as Array<any>, newEntry],
     });
   };
 
-  const handleSkillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setFormData({ ...formData, skills: value.split(",") });
+  const handleSkillChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const { name, value } = e.target;
+    const updatedSkills = [...formData.skills];
+    updatedSkills[index] = { ...updatedSkills[index], [name]: value };
+    setFormData({ ...formData, skills: updatedSkills });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
-    
-  };
+  
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 space-y-8">
-
+    <form className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Personal Information */}
       <div className="space-y-6">
-        <h3 className=" font-semibold text-gray-800">Personal Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="font-semibold text-gray-800">Personal Information</h3>
+        <div className="grid grid-cols-1 gap-4">
           <div className="flex items-center space-x-2">
             <label htmlFor="name" className="inline-block text-sm font-medium text-gray-700">Full Name</label>
             <input
@@ -73,18 +88,29 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
               name="name"
               value={formData.name}
               onChange={(e) => handleInputChange(e)}
-              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div className="flex items-center space-x-2">
-            <label htmlFor="email" className="inline-block text-sm font-medium text-gray-700">Email</label>
+            <label htmlFor="role" className="inline-block text-sm font-medium text-gray-700">Role</label>
             <input
-              id="email"
-              type="email"
-              name="email"
-              value={formData.email}
+              id="role"
+              type="text"
+              name="role"
+              value={formData.role}
               onChange={(e) => handleInputChange(e)}
-              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="address" className="inline-block text-sm font-medium text-gray-700">Address</label>
+            <input
+              id="address"
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange(e)}
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -95,9 +121,21 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
               name="phone"
               value={formData.phone}
               onChange={(e) => handleInputChange(e)}
-              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
             />
           </div>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="email" className="inline-block text-sm font-medium text-gray-700">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange(e)}
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+            />
+          </div>
+
           <div className="flex items-center space-x-2">
             <label htmlFor="linkedin" className="inline-block text-sm font-medium text-gray-700">LinkedIn</label>
             <input
@@ -106,7 +144,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
               name="linkedin"
               value={formData.linkedin}
               onChange={(e) => handleInputChange(e)}
-              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -117,7 +155,20 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
               name="github"
               value={formData.github}
               onChange={(e) => handleInputChange(e)}
-              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+            />
+          </div>
+
+
+          <div className="flex items-center space-x-2">
+            <label htmlFor="site" className="inline-block text-sm font-medium text-gray-700">Website</label>
+            <input
+              id="site"
+              type="url"
+              name="site"
+              value={formData.site}
+              onChange={(e) => handleInputChange(e)}
+              className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
             />
           </div>
         </div>
@@ -127,13 +178,13 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
       <div className="space-y-4">
         <h3 className=" font-semibold text-gray-800">Summary</h3>
         <div className="flex items-center space-x-2">
-          
+
           <textarea
             id="summary"
             name="summary"
             value={formData.summary}
             onChange={(e) => handleInputChange(e)}
-            className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 h-20"
+            className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400 h-20"
           />
         </div>
       </div>
@@ -143,7 +194,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
         <h3 className=" font-semibold text-gray-800">Experience</h3>
         {formData.experience.map((exp, index) => (
           <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center space-x-2">
                 <label className="inline-block text-sm font-medium text-gray-700">Job Title</label>
                 <input
@@ -151,7 +202,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="title"
                   value={exp.title}
                   onChange={(e) => handleInputChange(e, "experience", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -161,9 +212,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="company"
                   value={exp.company}
                   onChange={(e) => handleInputChange(e, "experience", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
               <div className="flex items-center space-x-2">
                 <label className="inline-block text-sm font-medium text-gray-700">Start Date</label>
                 <input
@@ -171,7 +225,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="startDate"
                   value={exp.startDate}
                   onChange={(e) => handleInputChange(e, "experience", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -181,7 +235,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="endDate"
                   value={exp.endDate}
                   onChange={(e) => handleInputChange(e, "experience", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
             </div>
@@ -191,7 +245,16 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                 name="description"
                 value={exp.description}
                 onChange={(e) => handleInputChange(e, "experience", index)}
-                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 h-20"
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400 h-20"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">Responsibilities</label>
+              <textarea
+                name="responsibilities"
+                value={exp.responsibilities.join(",")}
+                onChange={(e) => handleInputChange(e, "experience", index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400 h-20"
               />
             </div>
           </div>
@@ -210,7 +273,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
         <h3 className=" font-semibold text-gray-800">Education</h3>
         {formData.education.map((edu, index) => (
           <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center space-x-2">
                 <label className="inline-block text-sm font-medium text-gray-700">Degree</label>
                 <input
@@ -218,7 +281,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="degree"
                   value={edu.degree}
                   onChange={(e) => handleInputChange(e, "education", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -228,9 +291,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="institution"
                   value={edu.institution}
                   onChange={(e) => handleInputChange(e, "education", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
               <div className="flex items-center space-x-2">
                 <label className="inline-block text-sm font-medium text-gray-700">Start Date</label>
                 <input
@@ -238,7 +304,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="startDate"
                   value={edu.startDate}
                   onChange={(e) => handleInputChange(e, "education", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -248,7 +314,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                   name="endDate"
                   value={edu.endDate}
                   onChange={(e) => handleInputChange(e, "education", index)}
-                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
                 />
               </div>
             </div>
@@ -258,7 +324,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
                 name="description"
                 value={edu.description}
                 onChange={(e) => handleInputChange(e, "education", index)}
-                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 h-20"
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400 h-20"
               />
             </div>
           </div>
@@ -273,27 +339,88 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData }) => {
       </div>
 
       {/* Skills */}
-      <div className="space-y-4">
-        <h3 className=" font-semibold text-gray-800">Skills</h3>
-        <div className="flex items-center space-x-2">
-          <label htmlFor="skills" className="inline-block text-sm font-medium text-gray-700">Skills</label>
-          <input
-            id="skills"
-            type="text"
-            value={formData.skills.join(",")}
-            onChange={handleSkillChange}
-            className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
-          />
-        </div>
+      <div className="space-y-6">
+        <h3 className="font-semibold text-gray-800">Skills</h3>
+        {formData.skills.map((skill, index) => (
+          <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">Category</label>
+              <input
+                type="text"
+                name="category"
+                value={skill.category}
+                onChange={(e) => handleSkillChange(e, index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">List</label>
+              <input
+                type="text"
+                name="list"
+                value={skill.list}
+                onChange={(e) => handleSkillChange(e, index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+              />
+            </div>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addEntry("skills")}
+          className="px-2 py-1 bg-transparent text-blue-600 text-sm hover:underline focus:outline-none"
+        >
+          Add Skill
+        </button>
+      </div>
+
+      {/* Projects */}
+      <div className="space-y-6">
+        <h3 className="font-semibold text-gray-800">Projects</h3>
+        {formData.projects.map((project, index) => (
+          <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">Project Name</label>
+              <input
+                type="text"
+                name="name"
+                value={project.name}
+                onChange={(e) => handleInputChange(e, "projects", index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">Technologies</label>
+              <input
+                type="text"
+                name="technologies"
+                value={project.technologies}
+                onChange={(e) => handleInputChange(e, "projects", index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="inline-block text-sm font-medium text-gray-700">Details</label>
+              <textarea
+                name="details"
+                value={project.details.join(",")}
+                onChange={(e) => handleInputChange(e, "projects", index)}
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-400 h-20"
+              />
+            </div>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addEntry("projects")}
+          className="px-2 py-1 bg-transparent text-blue-600 text-sm hover:underline focus:outline-none"
+        >
+          Add Project
+        </button>
       </div>
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        className="w-full px-2 py-1 bg-transparent text-blue-600 text-sm border border-blue-600 rounded hover:bg-blue-50 focus:outline-none"
-      >
-        Update Resume
-      </button>
+      
     </form>
   );
 };
