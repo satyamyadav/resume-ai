@@ -1,14 +1,20 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLatexContext } from '@/context/LatexContext';
 import { compile } from '@/components/Templates';
 import ResumeForm from './ResumeForm';
 import { ResumeData } from "../types";
 
-
 export default function EditorPage() {
   const { latex, setLatex } = useLatexContext();
   const [resumeHtml, setResumeHtml] = useState('');
+  const resumePreviewRef = useRef<HTMLIFrameElement>(null);
+
+  const handlePrint = () => {
+    if (resumePreviewRef.current) {
+      (resumePreviewRef.current as HTMLIFrameElement).contentWindow?.print();
+    }
+  };
 
   useEffect(() => {
     if (!latex.length) {
@@ -19,14 +25,6 @@ export default function EditorPage() {
     console.log('Compiled result:', result);
     setResumeHtml(result);
   }, [latex])
-
-  useEffect(() => {
-    if (latex.length) {
-      // compileLatex();
-      // window.localStorage.setItem('latex', latex);
-    }
-  }, [latex]);
-
 
   const handleFormUpdate = (data: ResumeData) => {
     setLatex(JSON.stringify(data, null, 2));
@@ -50,41 +48,27 @@ export default function EditorPage() {
       </div>
 
       <div className="relative flex-grow overflow-hidden h-full shadow-lg border-l border-l-indigo-950">
-        {/* PDF Preview */}
-        <div className="w-full flex items-center justify-center  overflow-auto relative">
-          {/* {isCompiling && (
-              <div className="rounded-b-lg absolute bottom-0 left-0 right-0 p-4 bg-black/40 backdrop-blur-sm text-white text-center">
-              Generating resume in PDF...
-              </div>
-              )} */}
+        <div className="p-2 flex justify-between items-center text-gray-500">
+          <button onClick={handlePrint}
+            className="text-white px-4 rounded border border-indigo-300 ">
+            Print
+          </button>
+          <h2 className=" font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent text-center">Your Resume</h2>
+          <div></div>
+        </div>
+        {/* Preview */}
+        <div className=" flex items-center justify-center overflow-auto relative p-4">
           {!!resumeHtml.length && (
-            <div className="w-full max-w-[800px] mx-auto relative p-3"
-              style={{
+            <div className="relative flex flex-col items-center">
+              <iframe
+                ref={resumePreviewRef}
+                srcDoc={resumeHtml}
+                className="w-[793px] h-[1122px] border-none"
 
-                maxHeight: '100vh',
-                overflowY: 'auto',
-              }}>
-              {/* A4 aspect ratio container */}
-
-              {/* Content container */}
-              <div
-                className="w-full h-full bg-white shadow-lg"
-                style={{
-                  padding: '20mm',
-                }}
-              >
-                <div
-                  className="w-full h-full"
-                  dangerouslySetInnerHTML={{ __html: resumeHtml }}
-                ></div>
-              </div>
-
+              />
             </div>
           )}
-
         </div>
-
-
       </div>
     </div>
 
