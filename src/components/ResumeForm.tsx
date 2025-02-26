@@ -76,7 +76,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   const handleAIApply = (section: keyof ResumeData, index: number | undefined, suggestion: string) => {
     if (section && index !== undefined) {
       const updatedSection = [...formData[section] as Array<any>];
-      updatedSection[index] = { ...updatedSection[index], description: suggestion };
+      if (section === "projects") {
+        updatedSection[index] = { ...updatedSection[index], details: suggestion.split(",") };
+      } else {
+        updatedSection[index] = { ...updatedSection[index], description: suggestion };
+      }
       setFormData({ ...formData, [section]: updatedSection });
     } else {
       setFormData({ ...formData, summary: suggestion });
