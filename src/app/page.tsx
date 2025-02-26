@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FaLinkedin } from 'react-icons/fa';
 import { MdClose } from "react-icons/md";
 import { useRouter } from 'next/navigation';
@@ -44,17 +44,8 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [resumeData, setResumeData] = useState({ name: '', role: '' });
+  const [resumeData] = useState({ name: '', role: '' });
 
-  useEffect(() => {
-    // Check if user is already logged in
-    // If logged in, redirect to builder page
-    const resume = window.localStorage.getItem('latex');
-    if (resume) {
-      const data = JSON.parse(resume);
-      setResumeData(data);
-    }
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });

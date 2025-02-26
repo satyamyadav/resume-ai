@@ -22,7 +22,6 @@ export default function EditorPage() {
     }
     const data = JSON.parse(latex);
     const result = compile(data);
-    console.log('Compiled result:', result);
     setResumeHtml(result);
   }, [latex])
 

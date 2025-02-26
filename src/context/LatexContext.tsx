@@ -96,7 +96,17 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storedLatex = window.localStorage.getItem('latex');
-    if(storedLatex && storedLatex.length) {
+    let isValid = false;
+    // check if storedLatex is valid JSON
+    try {
+      JSON.parse(storedLatex || '');
+      isValid = true;
+    } catch (error) {
+      console.error('Invalid JSON stored in localStorage:', error);
+      isValid = false;
+      window.localStorage.removeItem('latex');
+    }
+    if(storedLatex && storedLatex.length && isValid) {
       setLatex(storedLatex);
     } else {
       setLatex(JSON.stringify(defaultJson, null, 2));
