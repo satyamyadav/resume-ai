@@ -9,6 +9,8 @@ export async function POST(req: Request) {
       role: 'user', content: `
       Generate resume in json with the given details.
       Use sample data for the fields that are not provided.
+      For personal informations like email, linkedin and github, don't use real data of any other person, instead 
+      use dummy data.
       Return the resume data in json format.
       Dont wrap the response in any code or tag.
       Return only json.

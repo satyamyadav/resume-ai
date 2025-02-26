@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Popover, PopoverPanel, PopoverButton } from "@headlessui/react";
-import { IoSparklesSharp, IoCheckmarkSharp } from "react-icons/io5";
+import { IoSparklesSharp, IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 
 
 interface AIHelperProps {
@@ -60,6 +60,11 @@ const AIHelper: React.FC<AIHelperProps> = ({ content, resumeData, hierarchy, onA
         anchor={{ to: 'bottom start', gap: '4px' }}
         className="absolute z-10 bg-white border-2 border-purple-300 p-3 rounded-md shadow-xl w-96">
         <div className="flex flex-col space-y-2">
+          <div className="flex justify-end">
+            <PopoverButton className="text-gray-500 hover:text-gray-700">
+              <IoCloseSharp size={20} />
+            </PopoverButton>
+          </div>
           <textarea
             className="border border-gray-200 p-2 rounded-md h-40 bg-gray-200 focus:outline-none"
             value={content}

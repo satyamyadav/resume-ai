@@ -88,7 +88,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   };
 
   return (
-    <form className="max-w-4xl mx-auto py-3 space-y-2">
+    <form className="max-w-6xl mx-auto py-3 space-y-2">
       {/* Personal Information */}
       <div className="space-y-1 rounded-md bg-gray-100 p-2">
         <h3 className="font-semibold text-gray-800">Personal Information</h3>

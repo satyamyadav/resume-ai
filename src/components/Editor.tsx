@@ -26,6 +26,20 @@ export default function EditorPage() {
     setResumeHtml(result);
   }, [latex])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+        event.preventDefault();
+        handlePrint();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const handleFormUpdate = (data: ResumeData) => {
     setLatex(JSON.stringify(data, null, 2));
   }
@@ -35,10 +49,9 @@ export default function EditorPage() {
   }
 
   return (
-
     <div className="h-full flex flex-row w-full">
       {/* Editor Section */}
-      <div className='h-full w-1/2 relative flex flex-col'>
+      <div className='h-full flex-1 relative flex flex-col print:hidden'>
         <div className="p-2 flex justify-center items-center text-gray-500 shadow-lg border-b border-b-indigo-950">
           <h2 className=" font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent text-center">Resume Builder</h2>
         </div>
@@ -47,8 +60,8 @@ export default function EditorPage() {
         </div>
       </div>
 
-      <div className="relative flex-grow overflow-hidden h-full shadow-lg border-l border-l-indigo-950">
-        <div className="p-2 flex justify-between items-center text-gray-500">
+      <div className="overflow-hidden h-full shadow-lg border-l border-l-indigo-950 flex flex-col print:border-none">
+        <div className="py-2 px-4 2xl:px-8 flex justify-between items-center text-gray-500 print:hidden">
           <button onClick={handlePrint}
             className="text-white px-4 rounded border border-indigo-300 ">
             Print
@@ -57,20 +70,16 @@ export default function EditorPage() {
           <div></div>
         </div>
         {/* Preview */}
-        <div className=" flex items-center justify-center overflow-auto relative p-4">
+        <div className="flex items-center justify-center relative overflow-auto h-full p-4 2xl:p-8 pt-0">
           {!!resumeHtml.length && (
-            <div className="relative flex flex-col items-center">
               <iframe
                 ref={resumePreviewRef}
                 srcDoc={resumeHtml}
-                className="w-[793px] h-[1122px] border-none"
-
+                className="w-[793px] h-full border-none print:block"
               />
-            </div>
           )}
         </div>
       </div>
     </div>
-
   );
 }
