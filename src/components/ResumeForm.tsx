@@ -43,7 +43,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
     const { name, value } = e.target;
 
     if (section && index !== undefined) {
-      const updatedSection = [...formData[section] as Array<any>];
+      const updatedSection = [...(formData[section] as unknown as Array<Record<string, string | string[]>>)];
       updatedSection[index] = { ...updatedSection[index], [name]: value };
       setFormData({ ...formData, [section]: updatedSection });
     } else {
@@ -52,7 +52,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   };
 
   const addEntry = (section: keyof ResumeData) => {
-    const newEntry = section === "experience"
+    const newEntry: Record<string, string | string[]> = section === "experience"
       ? { title: "", company: "", startDate: "", endDate: "", description: "", responsibilities: [] }
       : section === "education"
         ? { degree: "", institution: "", startDate: "", endDate: "", description: "" }
@@ -62,7 +62,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
 
     setFormData({
       ...formData,
-      [section]: [...formData[section] as Array<any>, newEntry],
+      [section]: [...(formData[section] as unknown as Array<Record<string, string | string[]>>), newEntry],
     });
   };
 
@@ -75,7 +75,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
 
   const handleAIApply = (section: keyof ResumeData, index: number | undefined, suggestion: string) => {
     if (section && index !== undefined) {
-      const updatedSection = [...formData[section] as Array<any>];
+      const updatedSection = [...(formData[section] as unknown as Array<Record<string, string | string[]>>)];
       if (section === "projects") {
         updatedSection[index] = { ...updatedSection[index], details: suggestion.split(",") };
       } else {
