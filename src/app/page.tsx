@@ -102,14 +102,16 @@ export default function Home() {
       {/* Hero Section */}
       {step === 0 && (
         <div className="text-center animate-fade-in">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent mb-4">
-            Resume Builder
-          </h1>
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h2 className="text-left text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             AI Powered
           </h2>
-          <p className="text-xl text-gray-400 mb-16">
-            Build professional resume in minutes.
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent mb-2">
+            Resume Builder
+          </h1>
+          <p className="text-l text-gray-400 mb-16">
+            <i>
+              Build professional resume in minutes.
+            </i>
           </p>
           <button
             onClick={() => setStep(2)}
@@ -125,7 +127,7 @@ export default function Home() {
             OR
           </h2>
           <p className="text-gray-400 mb-2">Continue Editing your resume for: {resumeData.name}</p>
-          
+
           <button onClick={() => router.push('/builder')}
             className=" px-4 py-1  text-gray-400 rounded-lg border-2 border-gray-500">
             Continue Editing
