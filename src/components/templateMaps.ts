@@ -57,7 +57,7 @@ export const defaultTemplate = `
     {{#if education}}
         <div class="section">
             <div class="section-title">Education</div>
-            {{#each education}}<p><strong>{{degree}}</strong> ({{year}})<br>{{institution}}</p>{{/each}}
+            {{#each education}}<p><strong>{{degree}}</strong> ({{startDate}} - {{endDate}})<br>{{institution}}</p>{{/each}}
         </div>
     {{/if}}
 
@@ -65,8 +65,9 @@ export const defaultTemplate = `
         <div class="section">
             <div class="section-title">Work Experience</div>
             {{#each experience}}
-                <h3>{{company}} ({{duration}})</h3>
-                <p><em>{{description}}</em></p>
+                <h3>{{title}} - {{company}}</h3>
+                <p><em>{{startDate}} - {{endDate}}</em></p>
+                <p>{{description}}</p>
                 <ul>{{#each responsibilities}}<li>{{this}}</li>{{/each}}</ul>
             {{/each}}
         </div>
@@ -83,7 +84,6 @@ export const defaultTemplate = `
         </div>
     {{/if}}
 
-    
 </body>
 </html>
 `;

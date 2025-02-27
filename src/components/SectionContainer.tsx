@@ -15,7 +15,7 @@ const SectionContainer: React.FC<SectionContainerProps> = ({ title, children, cl
     };
 
     return (
-        <div className={`space-y-1 border-t-2 border-gray-400 p-2 ${className}`}>
+        <div className={`p-2 md:p-6 md:pt-4 space-y-1 border-t-2 border-gray-400 ${className}`}>
             <div className="flex justify-between items-center" onClick={toggleExpand}>
                 <h3 className="font-semibold text-gray-800">{title}</h3>
                 <button type="button" 

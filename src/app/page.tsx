@@ -224,22 +224,15 @@ export default function Home() {
             }
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300"
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 disabled:opacity-50 disabled:hover:from-blue-600 disabled:hover:to-purple-600"
               disabled={loading}
             >
-              Proceed to Builder
+              {loading ? 'Getting you resume ready...' : '   Build My Resume   '}
             </button>
           </form>
         </div>
       )}
-      {
-        loading &&
-        (
-          <div className="flex justify-center items-center p-3">
-            <p className='text-gray-300'>Getting your resume ready...</p>
-          </div>
-        )
-      }
+      
 
     </div>
   );

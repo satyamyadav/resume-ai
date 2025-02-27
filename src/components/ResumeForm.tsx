@@ -39,13 +39,22 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     section?: keyof ResumeData,
-    index?: number
+    index?: number,
+    subIndex?: number
   ) => {
     const { name, value } = e.target;
 
     if (section && index !== undefined) {
       const updatedSection = [...(formData[section] as unknown as Array<Record<string, string | string[]>>)];
-      updatedSection[index] = { ...updatedSection[index], [name]: value };
+      if (section === "projects" && name === "details") {
+        updatedSection[index] = { ...updatedSection[index], [name]: value.split(",") };
+      } else if (section === "experience" && name === "responsibilities" && subIndex !== undefined) {
+        const updatedResponsibilities = [...(updatedSection[index].responsibilities as string[])];
+        updatedResponsibilities[subIndex] = value;
+        updatedSection[index] = { ...updatedSection[index], responsibilities: updatedResponsibilities };
+      } else {
+        updatedSection[index] = { ...updatedSection[index], [name]: value };
+      }
       setFormData({ ...formData, [section]: updatedSection });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -88,9 +97,18 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
     }
   };
 
+  const addResponsibility = (index: number) => {
+    const updatedExperience = [...formData.experience];
+    if (!Array.isArray(updatedExperience[index].responsibilities)) {
+      updatedExperience[index].responsibilities = [];
+    }
+    updatedExperience[index].responsibilities.push("");
+    setFormData({ ...formData, experience: updatedExperience });
+  };
+
   return (
-    <form className="max-w-6xl mx-auto py-3 space-y-2">
-      <div className="rounded-md bg-gray-100 space-y-4">
+    <form className="max-w-6xl mx-auto space-y-2 pb-4">
+      <div className="bg-gray-200">
         <SectionContainer title="Personal Information" className="border-none">
           <div className="grid grid-cols-1 gap-2">
             <div className="flex items-center space-x-2">
@@ -265,14 +283,26 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
               <div className="flex items-start space-x-2">
                 <div className="flex items-center">
                   <label className="inline-block text-sm font-medium text-gray-500">Responsibilities</label>
-                  <AIHelper content={exp.responsibilities.join(",")} resumeData={formData} hierarchy={`experience[${index}].responsibilities`} onApply={(suggestion) => handleAIApply("experience", index, suggestion)} />
+                  <AIHelper content={Array.isArray(exp.responsibilities) ? exp.responsibilities.join(",") : ""} resumeData={formData} hierarchy={`experience[${index}].responsibilities`} onApply={(suggestion) => handleAIApply("experience", index, suggestion)} />
                 </div>
-                <textarea
-                  name="responsibilities"
-                  value={exp.responsibilities.join(",")}
-                  onChange={(e) => handleInputChange(e, "experience", index)}
-                  className="flex-1  bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-400 text-gray-800 h-20"
-                />
+                <div className="flex-1 space-y-2">
+                  {Array.isArray(exp.responsibilities) && exp.responsibilities.map((responsibility, subIndex) => (
+                    <textarea
+                      key={subIndex}
+                      name="responsibilities"
+                      value={responsibility}
+                      onChange={(e) => handleInputChange(e, "experience", index, subIndex)}
+                      className="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-400 text-gray-800 h-10"
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addResponsibility(index)}
+                    className="bg-transparent text-blue-600 text-sm hover:underline focus:outline-none"
+                  >
+                    Add Responsibility
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -414,11 +444,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ aiData, onFormUpdate }) => {
               <div className="flex items-start space-x-2">
                 <div className="flex items-center">
                   <label className="inline-block text-sm font-medium text-gray-500">Details</label>
-                  <AIHelper content={project.details.join(",")} resumeData={formData} hierarchy={`projects[${index}].details`} onApply={(suggestion) => handleAIApply("projects", index, suggestion)} />
+                  <AIHelper content={Array.isArray(project.details) ? project.details.join(",") : ""} resumeData={formData} hierarchy={`projects[${index}].details`} onApply={(suggestion) => handleAIApply("projects", index, suggestion)} />
                 </div>
                 <textarea
                   name="details"
-                  value={project.details.join(",")}
+                  value={Array.isArray(project.details) ? project.details.join(",") : ""}
                   onChange={(e) => handleInputChange(e, "projects", index)}
                   className="flex-1  bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-400 text-gray-800 h-20"
                 />
