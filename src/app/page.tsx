@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaLinkedin } from 'react-icons/fa';
 import { MdClose } from "react-icons/md";
 import { useRouter } from 'next/navigation';
@@ -44,8 +44,15 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [resumeData] = useState({ name: '', role: '' });
+  const [resumeData, setResumeData] = useState({ name: '', role: '' });
 
+  useEffect(() => {
+    const storedLatex = window.localStorage.getItem('latex');
+    if (storedLatex) {
+      const parsedData = JSON.parse(storedLatex);
+      setResumeData({ name: parsedData.name, role: parsedData.role });
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -117,7 +124,7 @@ export default function Home() {
           <h2 className="font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent text-center mt-5">
             OR
           </h2>
-          <p className="text-gray-400 mb-2">Continue Editing you resume for: {resumeData.name}</p>
+          <p className="text-gray-400 mb-2">Continue Editing your resume for: {resumeData.name}</p>
           
           <button onClick={() => router.push('/builder')}
             className=" px-4 py-1  text-gray-400 rounded-lg border-2 border-gray-500">
