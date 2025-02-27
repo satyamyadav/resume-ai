@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLatexContext } from '@/context/LatexContext';
 import { compile } from '@/components/Templates';
-import { FaPrint, FaExchangeAlt } from 'react-icons/fa';
+import { FaPrint } from 'react-icons/fa';
 import TemplateSelector from './TemplateSelector';
 
 const ResumePreview: React.FC = () => {

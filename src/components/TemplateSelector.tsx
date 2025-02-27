@@ -4,6 +4,7 @@ import { useLatexContext } from '@/context/LatexContext';
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { TbTemplate } from "react-icons/tb";
 import { IoCloseSharp } from "react-icons/io5";
+import Image from 'next/image';
 
 const templates = [
     { name: 'oneColumn', title: 'One Column', screenshot: '/templates/base.png' },
@@ -39,7 +40,7 @@ const TemplateSelector: React.FC = () => {
                     {templates.map(template => (
                         <div key={template.name} className={`border p-2 rounded hover:bg-gray-300 cursor-pointer ${template.name == templateName ? 'border-indigo-400 ' : ''} w-76 h-76 flex flex-col items-center bg-gray-200`} onClick={() => handleTemplateSelect(template.name)}>
                             <div className="flex-grow flex items-center justify-center w-full h-full">
-                                <img src={template.screenshot} alt={template.title} className="object-contain mb-2 max-h-full max-w-full" />
+                                <Image src={template.screenshot} alt={template.title} className="object-contain mb-2 max-h-full max-w-full" />
                             </div>
                             <h2 className="absolute bottom-2">{template.title}</h2>
                         </div>
