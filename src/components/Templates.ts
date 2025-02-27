@@ -1,5 +1,5 @@
 import Handlebars from "handlebars"
-import { defaultTemplate } from "./templateMaps";
+import { defaultTemplate, twoColumnTemplate } from "./templateMaps";
 
 const printStyles = `
 <style>
@@ -43,11 +43,18 @@ const printStyles = `
 </style>
 `;
 
-const render = Handlebars.compile(defaultTemplate);
-
-export const compile = (data = {}) => {
-    return render({...data, printStyles});
+const getTemplate = (templateName: string) => {
+  switch (templateName) {
+    case 'twoColumn':
+      return twoColumnTemplate;
+    case 'base':
+    default:
+      return defaultTemplate;
+  }
 }
 
-
-
+export const compile = (data = {}, templateName = 'base') => {
+  const template = getTemplate(templateName);
+  const render = Handlebars.compile(template);
+  return render({...data, printStyles});
+}

@@ -1,21 +1,13 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type TCompilation = {
-  loading: boolean;
-  error: boolean;
-  success: boolean;
-  latex: string;
-  errorText: string;
-};
-
 interface LatexContextProps {
   latex: string;
   setLatex: (latex: string) => void;
   resumeId: string;
   setResumeId: (id: string) => void;
-  compilation: TCompilation;
-  setCompilation: (compilation: TCompilation) => void;
+  templateName: string;
+  setTemplateName: (name: string) => void;
 }
 
 const LatexContext = createContext<LatexContextProps | undefined>(undefined);
@@ -86,13 +78,7 @@ const defaultJson = {
 export const LatexProvider = ({ children }: { children: ReactNode }) => {
   const [latex, setLatex] = useState('');
   const [resumeId, setResumeId] = useState('');
-  const [compilation, setCompilation] = useState({
-    loading: false,
-    error: false,
-    success: false,
-    latex: '{}',
-    errorText: '',
-  });
+  const [templateName, setTemplateName] = useState('base');
 
   useEffect(() => {
     const storedLatex = window.localStorage.getItem('latex');
@@ -111,16 +97,24 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setLatex(JSON.stringify(defaultJson, null, 2));
     }
+
+    const storedTemplateName = window.localStorage.getItem('templateName');
+    if(storedTemplateName && storedTemplateName.length) {
+      setTemplateName(storedTemplateName);
+    }
   }, [])
 
   useEffect(() => {
     if (latex.length) {
       window.localStorage.setItem('latex', latex);
     }
-  } , [latex]);
+    if (templateName.length) {
+      window.localStorage.setItem('templateName', templateName);
+    }
+  } , [latex, templateName]);
 
   return (
-    <LatexContext.Provider value={{ latex, setLatex, resumeId, setResumeId, compilation, setCompilation }}>
+    <LatexContext.Provider value={{ latex, setLatex, resumeId, setResumeId, templateName, setTemplateName  }}>
       {children}
     </LatexContext.Provider>
   );
