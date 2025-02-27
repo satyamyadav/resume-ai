@@ -16,7 +16,7 @@ export default function EditorPage() {
   }
 
   return (
-    <div className='h-full flex-1 relative flex flex-col print:hidden'>
+    <div className='h-auto md:h-full flex-1 relative flex flex-col print:hidden'>
       <div className="p-2 flex justify-center items-center text-gray-500">
         <h2 className=" font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent text-center">Resume Builder</h2>
       </div>

@@ -40,7 +40,7 @@ const ResumePreview: React.FC = () => {
     }, []);
 
     return (
-        <div className="overflow-hidden h-full shadow-lg border-l border-l-indigo-950 flex flex-col print:border-none">
+        <div className="overflow-hidden h-screen md:h-full shadow-lg border-l border-l-indigo-950 flex flex-col print:border-none">
             <div className="py-2 px-4 2xl:px-8 flex justify-between items-center text-gray-500 print:hidden">
                 <div className='space-x-2 flex items-center'>
                     <TemplateSelector />

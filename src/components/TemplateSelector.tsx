@@ -38,9 +38,9 @@ const TemplateSelector: React.FC = () => {
                 </div>
                 <div className="space-x-2 flex">
                     {templates.map(template => (
-                        <div key={template.name} className={`border p-2 rounded hover:bg-gray-300 cursor-pointer ${template.name == templateName ? 'border-indigo-400 ' : ''} w-76 h-76 flex flex-col items-center bg-gray-200`} onClick={() => handleTemplateSelect(template.name)}>
+                        <div key={template.name} className={`border p-2 rounded hover:bg-gray-300 cursor-pointer ${template.name == templateName ? 'border-indigo-400 ' : ''} flex flex-col items-center bg-gray-200`} onClick={() => handleTemplateSelect(template.name)}>
                             <div className="flex-grow flex items-center justify-center w-full h-full">
-                                <Image src={template.screenshot} alt={template.title} className="object-contain mb-2 max-h-full max-w-full" />
+                                <Image height={400} width={300} src={template.screenshot} alt={template.title} className="object-contain mb-2 max-h-full max-w-full" />
                             </div>
                             <h2 className="absolute bottom-2">{template.title}</h2>
                         </div>
