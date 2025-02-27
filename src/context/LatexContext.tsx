@@ -8,6 +8,8 @@ interface LatexContextProps {
   setResumeId: (id: string) => void;
   templateName: string;
   setTemplateName: (name: string) => void;
+  isTemplateSelectorOpen: boolean;
+  setTemplateSelectorOpen: (isOpen: boolean) => void;
 }
 
 const LatexContext = createContext<LatexContextProps | undefined>(undefined);
@@ -79,6 +81,7 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
   const [latex, setLatex] = useState('');
   const [resumeId, setResumeId] = useState('');
   const [templateName, setTemplateName] = useState('base');
+  const [isTemplateSelectorOpen, setTemplateSelectorOpen] = useState(false);
 
   useEffect(() => {
     const storedLatex = window.localStorage.getItem('latex');
@@ -114,7 +117,7 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
   } , [latex, templateName]);
 
   return (
-    <LatexContext.Provider value={{ latex, setLatex, resumeId, setResumeId, templateName, setTemplateName  }}>
+    <LatexContext.Provider value={{ latex, setLatex, resumeId, setResumeId, templateName, setTemplateName, isTemplateSelectorOpen, setTemplateSelectorOpen  }}>
       {children}
     </LatexContext.Provider>
   );
