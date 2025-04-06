@@ -10,6 +10,7 @@ import { FiCode } from 'react-icons/fi';
 import { FaPrint } from 'react-icons/fa';
 import { Switch } from '@headlessui/react';
 import TemplateSelector from '@/components/TemplateSelector';
+import Chat from '@/components/Chat';
 
 export default function Home() {
   const [activeView, setActiveView] = useState<boolean>(false);
@@ -26,20 +27,16 @@ export default function Home() {
         <div className="w-[30%]  text-white flex flex-col">
           {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800">
-            <FaRegFileAlt className="text-gray-400" />
-            <span className="text-sm text-gray-400">Resume AI</span>
+            <FiMessageSquare />
+            <span className="text-sm">Resume AI</span>
           </div>
 
-          {/* Chat Header */}
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-800">
-            <FiMessageSquare />
-            <span className="text-sm">Chat</span>
-          </div>
+          
 
           {/* Chat Content */}
-          <div className="flex-1 overflow-auto p-4 text-sm">
+          <div className="flex-1 overflow-auto p-3 pt-0 text-sm">
             {/* Replace this with your chat component */}
-            <p className="text-gray-400">Chat with AI here...</p>
+            <Chat />
           </div>
         </div>
 

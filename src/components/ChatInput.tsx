@@ -39,7 +39,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, placeholder, sen
 
 
     return (
-        <div className="flex items-center border-t p-3">
+        <div className="flex items-center border rounded-xl border-slate-600 relative">
             <textarea
                 ref={textareaRef}
                 value={value}
@@ -48,11 +48,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, placeholder, sen
                 onInput={handleInput}
                 placeholder={placeholder}
                 rows={1} // Set a default number of rows
-                className="w-full resize-none overflow-hidden border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style={{ minHeight: '2.5rem' }} // Set minimum height
+                className="bg-transparent pr-10 w-full resize-none overflow-hidden border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ minHeight: '4rem' }} // Set minimum height
             />
             <button
-                className="ml-3 text-gray-400 hover:text-gray-600"
+                className="absolute right-0 top-0 p-3 text-gray-400 hover:text-gray-600 h-full items-center flex justify-center"
                 onClick={triggerMessage}
                 aria-label="Send Message"
             >

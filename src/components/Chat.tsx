@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiCpu, FiPlus } from 'react-icons/fi';
+import { FiCpu } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import { useLatexContext } from '../context/LatexContext';
 import './Shimmer.css';
@@ -13,10 +13,10 @@ const ChatMessage = ({ role, content, loading }: Message) => {
   if (loading) {
     return (
       <div className="flex flex-row py-2">
-        <div className="pr-2">
+        <div className="pr-2 text-gray-50">
           <FiCpu />
         </div>
-        <div className="w-3/4 p-2 rounded-lg bg-gray-100">
+        <div className="w-3/4 p-2 rounded-lg bg-slate-700">
           <div className="rounded shimmer w-full p-1 mb-1"></div>
           <div className="rounded shimmer w-3/4 p-1 mb-1"></div>
           <div className="rounded shimmer w-1/2 p-1"></div>
@@ -26,8 +26,8 @@ const ChatMessage = ({ role, content, loading }: Message) => {
   }
   if (role === 'user') {
     return (
-      <div className="flex flex-row py-2 justify-end text-gray-700">
-        <div className="w-3/4 p-2 rounded-lg flex justify-end text-right transition-all">
+      <div className="flex flex-row py-2 justify-end text-gray-50">
+        <div className="w-3/4 p-2 rounded-lg flex justify-end text-right bg-slate-700 transition-all">
           {content}
         </div>
       </div>
@@ -36,15 +36,15 @@ const ChatMessage = ({ role, content, loading }: Message) => {
   if (role === 'assistant' && content) {
     const isUpdate = content == 'Resume updated.';
     return (
-      <div className="flex flex-row py-2 text-gray-700">
+      <div className="flex flex-row py-2 text-gray-50">
         <div className="pr-1">
-          <div className='rounded-full bg-gray-200 p-1'>
+          <div className='rounded-full bg-slate-600 p-1'>
             <FiCpu />
           </div>
         </div>
-        <div className={`w-3/4 flex  ${isUpdate ? 'text-xs' : ''}`}>
-          <div className='p-2 rounded-lg bg-gray-100 transition-all'>
-            <ReactMarkdown className="prose">{content}</ReactMarkdown>
+        <div className={`w-3/4 flex ${isUpdate ? 'text-xs' : ''}`}>
+          <div className='p-2 rounded-lg bg-slate-700 transition-all'>
+            <ReactMarkdown className="prose prose-invert">{content}</ReactMarkdown>
           </div>
         </div>
       </div>
@@ -55,30 +55,46 @@ const ChatMessage = ({ role, content, loading }: Message) => {
 
 export default function Chat() {
   const { setLatex, latex, setResumeId } = useLatexContext();
-  const [messages, setMessages] = useState<Message[]>([{
-    role: 'assistant',
-    content: 'Hello! What is your name ?',
-  }]);
+  const [messages, setMessages] = useState<Message[] >([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    try {
+      const storedMessages = window.localStorage.getItem('chatMessages');
+      if (storedMessages) {
+        const parsedMessages = JSON.parse(storedMessages);
+        if (Array.isArray(parsedMessages)) {
+          setMessages(parsedMessages);
+        } else {
+          throw new Error('Invalid messages format');
+        }
+      } else {
+        setMessages([{
+          role: 'assistant',
+          content: 'Hello! What is your name ?',
+        }]);
+      }
+    } catch (error) {
+      console.error('Error loading messages from localStorage:', error);
+      setMessages([{
+        role: 'assistant',
+        content: 'Hello! What is your name ?',
+      }]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if(messages.length > 0) {
+      window.localStorage.setItem('chatMessages', JSON.stringify(messages));
     }
   }, [messages]);
 
   useEffect(() => {
-    if (messages.length === 0) {
-      const storedMessages = window.localStorage.getItem('chatMessages');
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      }
-    } else {
-      window.localStorage.setItem('chatMessages', JSON.stringify(messages));
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-
   }, [messages]);
 
   const sendMessage = async () => {
@@ -120,22 +136,11 @@ export default function Chat() {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto p-4 h-full">
-      <div className="h-full flex flex-col justify-between bg-white rounded-xl shadow-md">
+    <div className="w-full h-full bg-slate-800 text-gray-50">
+      <div className="h-full flex flex-col justify-between shadow-md">
         {/* Chat Messages */}
-        <div className="p-2 border-b flex justify-between items-center text-gray-500">
-          <div></div>
-          <h3 className=" text-center">Chat with AI</h3>
-          <button
-            className="gray ml-2"
-            onClick={startFresh}
-            aria-label="Compile Resume"
-            title="Compile Resume"
-          >
-            <FiPlus title='Compile Resume' size={20} />
-          </button>
-        </div>
-        <div className="flex-grow overflow-y-auto px-4">
+        
+        <div className="flex-grow overflow-y-auto">
 
           {messages.map((msg, idx) => (
             <ChatMessage key={idx} role={msg.role} content={msg.content} />
