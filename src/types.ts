@@ -31,22 +31,7 @@ export interface Portfolio {
   linkedin: string;
 }
 
-export interface ResumeData {
-  name: string;
-  role: string;
-  address: string;
-  phone: string;
-  email: string;
-  github: string;
-  linkedin: string;
-  site: string;
-  summary: string;
-  skills: Skill[];
-  education: Education[];
-  experience: Experience[];
-  projects: Project[];
-  portfolio: Portfolio;
-}
+export type ResumeData = string
 
 export interface ResumeFormProps {
   aiData?: ResumeData;

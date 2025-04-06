@@ -4,6 +4,7 @@ import { FaLinkedin } from 'react-icons/fa';
 import { MdClose } from "react-icons/md";
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import HtmlPreview from '@/components/HtmlPreview';
 
 /**
  * manual data
@@ -44,13 +45,13 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [resumeData, setResumeData] = useState({ name: '', role: '' });
+  const [currentResume, setCurrentResume] = useState<null | string>(null);
 
   useEffect(() => {
-    const storedLatex = window.localStorage.getItem('latex');
-    if (storedLatex) {
-      const parsedData = JSON.parse(storedLatex);
-      setResumeData({ name: parsedData.name, role: parsedData.role });
+    const storedResume = window.localStorage.getItem('renderedHtml');
+    if (storedResume && storedResume.length) {
+      
+      setCurrentResume(storedResume);
     }
   }, []);
 
@@ -84,7 +85,7 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await axios.post('/api/completion/manual', { name, role });
-      window.localStorage.setItem('latex', JSON.stringify(response.data));
+      window.localStorage.setItem('latex', response.data.markdown);
       window.localStorage.setItem('suggestions', JSON.stringify({}));
       router.push('/builder');
     } catch (error) {
@@ -121,13 +122,14 @@ export default function Home() {
           </button>
         </div>
       )}
-      {step === 0 && resumeData.name.length > 0 && (
+      {step === 0 && currentResume && (
         <div className="w-full max-w-md animate-fade-in text-center">
           <h2 className="font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent text-center mt-5">
             OR
           </h2>
-          <p className="text-gray-400 mb-2">Continue Editing your resume for: {resumeData.name}</p>
-
+          <div className='flex justify-center p-4 rounded'>
+            <HtmlPreview html={currentResume} />
+          </div>
           <button onClick={() => router.push('/builder')}
             className=" px-4 py-1  text-gray-400 rounded-lg border-2 border-gray-500">
             Continue Editing

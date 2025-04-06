@@ -8,7 +8,7 @@ export default function EditorPage() {
   const { latex, setLatex } = useLatexContext();
 
   const handleFormUpdate = (data: ResumeData) => {
-    setLatex(JSON.stringify(data, null, 2));
+    setLatex(data);
   }
 
   if (!latex.length) {
@@ -21,7 +21,7 @@ export default function EditorPage() {
         <h2 className="font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent text-center">Resume Builder</h2>
       </div>
       <div className="w-full px-2 overflow-auto flex-grow">
-        <ResumeForm aiData={JSON.parse(latex)} onFormUpdate={handleFormUpdate} />
+        <ResumeForm aiData={latex} onFormUpdate={handleFormUpdate} />
       </div>
     </div>
   )

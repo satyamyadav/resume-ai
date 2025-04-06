@@ -5,10 +5,10 @@ import { FaPrint } from 'react-icons/fa';
 import TemplateSelector from './TemplateSelector';
 
 const ResumePreview: React.FC = () => {
-    const { latex, templateName } = useLatexContext();
-    const [resumeHtml, setResumeHtml] = useState('');
+    const { latex, templateName, renderedHtml, setRenderedHtml } = useLatexContext();
+    const [resumeHtml, setResumeHtml] = useState(renderedHtml || '');
+    const [isLoading, setIsLoading] = useState(false);
     const resumePreviewRef = useRef<HTMLIFrameElement>(null);
-
 
     const handlePrint = () => {
         if (resumePreviewRef.current) {
@@ -20,10 +20,29 @@ const ResumePreview: React.FC = () => {
         if (!latex.length) {
             return;
         }
-        const data = JSON.parse(latex);
-        const result = compile(data, templateName);
-        setResumeHtml(result);
-    }, [latex, templateName])
+
+        const fetchRenderedTemplate = async () => {
+            setIsLoading(true); // Start loader
+            const storedLatex = window.localStorage.getItem('latex');
+            const storedTemplateName = window.localStorage.getItem('templateName');
+            const storedHtml = window.localStorage.getItem('renderedHtml');
+
+            // Check if stored values match current values
+            if (storedLatex === latex && storedTemplateName === templateName && storedHtml) {
+                setResumeHtml(storedHtml); // Use stored HTML
+                setIsLoading(false); // Stop loader
+                return;
+            }
+
+            // Call render API if values don't match
+            const result = await compile(latex, templateName);
+            setResumeHtml(result);
+            setRenderedHtml(result);
+            setIsLoading(false); // Stop loader
+        };
+
+        fetchRenderedTemplate();
+    }, [latex, templateName]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,15 +72,21 @@ const ResumePreview: React.FC = () => {
             </div>
             {/* Preview */}
             <div className="flex items-center justify-center relative overflow-auto h-full p-4 2xl:p-8 pt-2 2xl:pt-2">
-                {!!resumeHtml.length && (
-                    <iframe
-                        ref={resumePreviewRef}
-                        srcDoc={resumeHtml}
-                        className="w-[793px] h-full border-none print:block"
-                    />
+                {isLoading ? (
+                    <div className="w-[793px] h-full border-none print:block flex justify-center items-center">
+                        <div className="text-gray-500">Compiling...</div>
+
+                    </div>
+                ) : (
+                    !!resumeHtml.length && (
+                        <iframe
+                            ref={resumePreviewRef}
+                            srcDoc={resumeHtml}
+                            className="w-[793px] h-full border-none print:block"
+                        />
+                    )
                 )}
             </div>
-            
         </div>
     );
 };

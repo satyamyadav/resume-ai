@@ -1,3 +1,40 @@
+const printStyles = `
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 20mm 20mm 20mm;
+  }
+
+  @media print {
+    h1, h2, h3, p, ul, li, table {
+        break-inside: avoid;
+    }
+    body, main {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+    }
+  }
+
+  main {
+    font-family: 'Arial', sans-serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    min-height: 1122px;
+    background: white;
+    color: #333;
+    box-sizing: border-box;
+    padding: 20mm;
+    margin: 0;
+    width: 100%;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+`;
+
 export const defaultTemplate = `
 <!DOCTYPE html>
 <html lang="en">
@@ -5,9 +42,12 @@ export const defaultTemplate = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{name}} - Resume</title>
-    {{{printStyles}}}
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.4; }
+    
+</head>
+<body>
+<main>
+<style>
+        main { font-family: Arial, sans-serif; line-height: 1.4; }
         h1, h2, h3 { color: #004080; margin: 0; }
         h1 { font-size: 24px; }
         h2 { font-size: 18px; }
@@ -20,8 +60,7 @@ export const defaultTemplate = `
         ul { padding-left: 15px; margin: 5px 0; }
         p { margin: 3px 0; }
     </style>
-</head>
-<body>
+${printStyles}
     <div class="header">
         <h1>{{name}}</h1>
         {{#if role}}<h2>{{role}}</h2>{{/if}}
@@ -83,7 +122,7 @@ export const defaultTemplate = `
             {{/each}}
         </div>
     {{/if}}
-
+</main>
 </body>
 </html>
 `;
@@ -95,9 +134,12 @@ export const twoColumnTemplate = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{name}} - Resume</title>
-    {{{printStyles}}}
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.4; margin: 0; padding: 0; display: flex; }
+    
+</head>
+<body>
+<main>
+<style>
+        main { font-family: Arial, sans-serif; line-height: 1.4; margin: 0; padding: 0; display: flex; }
         h1, h2, h3 { color: #004080; margin: 0; }
         h1 { font-size: 24px; }
         h2 { font-size: 18px; }
@@ -115,8 +157,7 @@ export const twoColumnTemplate = `
         .skills ul { list-style: none; padding-left: 0; }
         .skills li { margin-bottom: 5px; }
     </style>
-</head>
-<body>
+${printStyles}
     <!-- Left Column -->
     <div class="left-column">
         <div class="header">
@@ -199,6 +240,7 @@ export const twoColumnTemplate = `
             </div>
         {{/if}}
     </div>
+</main>
 </body>
 </html>
 `;

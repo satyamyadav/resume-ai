@@ -1,49 +1,9 @@
 import Handlebars from "handlebars"
 import { defaultTemplate, twoColumnTemplate } from "./templateMaps";
 
-const printStyles = `
-<style>
-  @page {
-    size: A4;
-    margin: 20mm 20mm 20mm 20mm;
-  }
 
-  @media print {
-    
-    /* Prevent breaking inside elements */
-    h1, h2, h3, p, ul, li, table {
-        break-inside: avoid;
-    }
 
-    body {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100%;
-    }
-    
-  }
-
-  body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12pt;
-    line-height: 1.5;
-    min-height: 1122px;
-    background: white;
-    color: #333;
-    box-sizing: border-box;
-    padding: 20mm 20mm 20mm 20mm; /* Ensures margins on all pages */
-    margin: 0; /* Prevents extra padding affecting layout */
-    width: 100%;
-  }
-
-  /* Hide Scrollbars in Print Preview */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-</style>
-`;
-
-const getTemplate = (templateName: string) => {
+const getTemplateContent = (templateName: string) => {
   switch (templateName) {
     case 'twoColumn':
       return twoColumnTemplate;
@@ -51,10 +11,28 @@ const getTemplate = (templateName: string) => {
     default:
       return defaultTemplate;
   }
-}
+};
 
-export const compile = (data = {}, templateName = 'base') => {
-  const template = getTemplate(templateName);
-  const render = Handlebars.compile(template);
-  return render({...data, printStyles});
-}
+export const compile = async (markdownData = "", templateName = "base") => {
+  const templateContent = getTemplateContent(templateName);
+
+  try {
+    const response = await fetch('/api/completion/render', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ markdown: markdownData, template: templateContent }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to render template');
+    }
+
+    const { html } = await response.json();
+    return html;
+  } catch (error) {
+    console.error('Error rendering template:', error);
+    return `<div>Error rendering template</div>`;
+  }
+};
