@@ -39,7 +39,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, placeholder, sen
 
 
     return (
-        <div className="flex items-center border rounded-xl border-slate-600 relative">
+        <div className="flex items-center rounded-xl relative mr-3">
             <textarea
                 ref={textareaRef}
                 value={value}
