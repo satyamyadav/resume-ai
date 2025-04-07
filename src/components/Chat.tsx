@@ -56,11 +56,72 @@ const ChatMessage = ({ role, content, loading }: Message) => {
 };
 
 export default function Chat() {
-  const { setLatex, latex, setResumeId } = useLatexContext();
-  const [messages, setMessages] = useState<Message[] >([]);
+  const { setLatex, latex, setResumeId, userData, setUserData } = useLatexContext();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        if (userData?.isNew) {
+          if (userData.name && userData.role) {
+            const messages: Message[] = [
+              {
+                role: "assistant",
+                content: "Hello! What is your name ?"
+              },
+              {
+                role: "user",
+                content: userData.name
+              },
+              {
+                role: "assistant",
+                content: "What is your profession ?"
+              },
+              {
+                role: "user",
+                content: userData.role
+              }
+            ];
+
+            setMessages(messages);
+            try {
+              const res = await axios.post('/api/chat', { messages: messages, latex });
+              const reply = res.data.reply;
+
+              const latexMatch = reply.match(/ZZZCODEZZZ([\s\S]*?)ZZZCODEZZZ/);
+              if (latexMatch) {
+                setLatex(latexMatch[1].trim());
+                setMessages([...messages, { role: 'assistant', content: 'Resume updated.' }]);
+              } else {
+                setMessages([...messages, { role: 'assistant', content: reply }]);
+              }
+            } catch (error) {
+              console.error('Error communicating with AI:', error);
+            } finally {
+              setLoading(false);
+              setUserData({ ...userData, isNew: false });
+            }
+
+            
+
+            return;
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error loading messages from localStorage:', error);
+        setMessages([{
+          role: 'assistant',
+          content: 'Hello! What is your name ?',
+        }]);
+      }
+    }
+
+    fetchData();
+  }, [userData]);
 
   useEffect(() => {
     try {
@@ -88,7 +149,7 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if(messages.length > 0) {
+    if (messages.length > 0) {
       window.localStorage.setItem('chatMessages', JSON.stringify(messages));
     }
   }, [messages]);
@@ -141,7 +202,7 @@ export default function Chat() {
     <div className="w-full h-full bg-slate-800 text-gray-50">
       <div className="h-full flex flex-col justify-between shadow-md">
         {/* Chat Messages */}
-        
+
         <div className="flex-grow overflow-y-auto pr-3 pb-2">
 
           {messages.map((msg, idx) => (

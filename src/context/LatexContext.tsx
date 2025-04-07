@@ -1,6 +1,5 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { json } from 'stream/consumers';
 
 interface LatexContextProps {
   latex: string;
@@ -13,6 +12,8 @@ interface LatexContextProps {
   setTemplateName: (name: string) => void;
   isTemplateSelectorOpen: boolean;
   setTemplateSelectorOpen: (isOpen: boolean) => void;
+  userData?: { name: string; role: string; isNew: boolean; isManual: boolean };
+  setUserData: (userData: { name: string; role: string; isNew: boolean; isManual: boolean } | undefined) => void;
 }
 
 const LatexContext = createContext<LatexContextProps | undefined>(undefined);
@@ -101,10 +102,12 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
   const [resumeId, setResumeId] = useState('');
   const [templateName, setTemplateName] = useState('base');
   const [isTemplateSelectorOpen, setTemplateSelectorOpen] = useState(false);
+  const [userData, setUserData] = useState<{ name: string; role: string; isNew: boolean; isManual: boolean } | undefined>(undefined);
 
   useEffect(() => {
     const storedLatex = window.localStorage.getItem('latex');
     const storedHtml = window.localStorage.getItem('renderedHtml');
+    const storedUserData = window.localStorage.getItem('userData');
     let isValid = false;
     // check if storedLatex is valid JSON
     try {
@@ -127,6 +130,17 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     if (storedTemplateName && storedTemplateName.length) {
       setTemplateName(storedTemplateName);
     }
+    if (storedUserData && storedUserData.length) {
+      try {
+        const parsedUserData = JSON.parse(storedUserData);
+        setUserData(parsedUserData);
+      } catch (error) {
+        console.error('Invalid JSON stored in localStorage:', error);
+        window.localStorage.removeItem('userData');
+      }
+    } else {
+      setUserData({ name: '', role: '', isNew: false, isManual: false });
+    }
   }, []);
 
   useEffect(() => {
@@ -139,10 +153,17 @@ export const LatexProvider = ({ children }: { children: ReactNode }) => {
     if (templateName.length) {
       window.localStorage.setItem('templateName', templateName);
     }
-  }, [latex, renderedHtml, templateName]);
+    if(userData && userData.name && userData.role) {
+      window.localStorage.setItem('userData', JSON.stringify(userData));
+    }
+  }, [latex, renderedHtml, templateName, userData]);
 
   return (
-    <LatexContext.Provider value={{ latex, setLatex, renderedHtml, setRenderedHtml, resumeId, setResumeId, templateName, setTemplateName, isTemplateSelectorOpen, setTemplateSelectorOpen }}>
+    <LatexContext.Provider value={{ 
+      latex, setLatex, renderedHtml, setRenderedHtml, resumeId, setResumeId, templateName, setTemplateName, isTemplateSelectorOpen, 
+      setTemplateSelectorOpen,
+      userData, setUserData
+       }}>
       {children}
     </LatexContext.Provider>
   );

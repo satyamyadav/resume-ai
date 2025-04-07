@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLatexContext } from '@/context/LatexContext';
 import { compile } from '@/components/Templates';
-import { FaPrint } from 'react-icons/fa';
+import axios from 'axios';
 
 const ResumePreview: React.FC = () => {
-    const { latex, templateName, renderedHtml, setRenderedHtml } = useLatexContext();
+    const { latex, templateName, renderedHtml, setRenderedHtml, userData, setUserData, setLatex } = useLatexContext();
     const [resumeHtml, setResumeHtml] = useState(renderedHtml || '');
     const [isLoading, setIsLoading] = useState(false);
     const resumePreviewRef = useRef<HTMLIFrameElement>(null);
@@ -14,6 +14,25 @@ const ResumePreview: React.FC = () => {
             (resumePreviewRef.current as HTMLIFrameElement).contentWindow?.print();
         }
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (userData?.isNew) {
+                try {
+                    setIsLoading(true); // Start loader
+                    const comRes = await axios.post('/api/completion/manual', { name: userData.name, role: userData.role });
+                    setLatex(comRes.data.markdown);
+                } catch (error) {
+                    console.error('Error communicating with AI:', error);
+
+                } finally {
+                    setIsLoading(false); // Stop loader
+                    setUserData({ ...userData, isNew: false });
+                }
+            }
+        }
+        fetchData();
+    }, [userData])
 
     useEffect(() => {
         if (!latex.length) {
@@ -59,7 +78,7 @@ const ResumePreview: React.FC = () => {
 
     return (
         <div className="overflow-hidden h-screen md:h-full shadow-lg border-l border-l-indigo-950 flex flex-col print:border-none">
-            
+
             {/* Preview */}
             <div className="flex items-center justify-center relative overflow-auto h-full p-4 2xl:p-8 pt-2 2xl:pt-2">
                 {isLoading ? (
