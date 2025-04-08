@@ -1,6 +1,6 @@
 // app/layout.tsx
 import './globals.css';
-import { Roboto } from 'next/font/google'
+import { Roboto } from 'next/font/google';
 
 // If loading a variable font, you don't need to specify the font weight
 // Configure the Roboto font
@@ -9,7 +9,7 @@ const roboto = Roboto({
   style: ['normal', 'italic'],
   subsets: ['latin'],
   display: 'swap',
-})
+});
 
 export const metadata = {
   title: 'Resume Builder',
@@ -23,7 +23,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={roboto.className}>
-      <body>{children}</body>
+      <body>
+          {children}
+      </body>
     </html>
   );
 }
