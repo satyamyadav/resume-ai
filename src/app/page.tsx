@@ -84,44 +84,23 @@ export default function Home() {
     const { name, role } = userData;
     try {
       setLoading(true);
-      window.localStorage.setItem('userData', JSON.stringify({
+      
+      // Create empty resume in database first
+      const resumeResponse = await axios.post('/api/resume', {
         name,
         role,
-        isNew: true,
-        isManual: true
-      }));
-      // const response = await axios.post('/api/completion/manual', { name, role });
-      // window.localStorage.setItem('latex', response.data.markdown);
-      // if (userData.name && userData.role) {
-      //   const messages = [
-      //     {
-      //       role: "assistant",
-      //       content: "Hello! What is your name ?"
-      //     },
-      //     {
-      //       role: "user",
-      //       content: userData.name
-      //     },
-      //     {
-      //       role: "assistant",
-      //       content: "What is your profession ?"
-      //     },
-      //     {
-      //       role: "user",
-      //       content: userData.role
-      //     }
-      //   ]
-      //   window.localStorage.setItem('chatMessages', JSON.stringify(messages));
-      // }
-      // window.localStorage.setItem('suggestions', JSON.stringify({}));
-      router.push('/builder');
+        
+        
+      });
+      
+      // Redirect to resume page
+      router.push(`/resume/${resumeResponse.data.id}`);
     } catch (error) {
-      console.error('Error fetching manual resume:', error);
-      setError('Error fetching manual resume');
+      console.error('Error creating resume:', error);
+      setError('Error creating resume');
     } finally {
       setLoading(false);
     }
-
   };
 
 

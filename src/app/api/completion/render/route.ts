@@ -24,21 +24,47 @@ ${markdown}
     },
   ];
 
-  try {
-    const res = await fetch(`${process.env.TOGETHER_API_URL}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ model: `${process.env.TOGETHER_API_MODEL}`, messages }),
-    });
+  
 
+  try {
+    
+    // Update the fetch call to use the "completions" endpoint
+    const res = await fetch("http://localhost:11434/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "mistral",
+        messages:  messages,
+        stream: false
+      })
+    });
+  
     const data = await res.json();
-    const html = data.choices[0].message.content;
-    return NextResponse.json({ html });
+    const resume = data.message.content;
+  
+    return NextResponse.json({ html: resume });
   } catch (error) {
-    console.error('Error communicating with AI:', error);
+      console.error('Error communicating with AI:', error);
     return NextResponse.error();
   }
+
+
+
+  // try {
+  //   const res = await fetch(`${process.env.TOGETHER_API_URL}`, {
+  //     method: 'POST',
+  //     headers: {
+  //       Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ model: `${process.env.TOGETHER_API_MODEL}`, messages }),
+  //   });
+
+  //   const data = await res.json();
+  //   const html = data.choices[0].message.content;
+  //   return NextResponse.json({ html });
+  // } catch (error) {
+  //   console.error('Error communicating with AI:', error);
+  //   return NextResponse.error();
+  // }
 }

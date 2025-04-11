@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { use } from 'react';
 import Editor from '@/components/Editor';
 import ResumePreview from '@/components/ResumePreview';
 import { LatexProvider } from '@/context/LatexContext';
 import { FiMessageSquare } from 'react-icons/fi';
-import { FaRegFileAlt } from 'react-icons/fa';
 import { FiCode } from 'react-icons/fi';
 import { FaPrint } from 'react-icons/fa';
 import { Switch } from '@headlessui/react';
@@ -13,14 +13,71 @@ import TemplateSelector from '@/components/TemplateSelector';
 import Chat from '@/components/Chat';
 import { Menu } from '@headlessui/react';
 import { FaUserCircle } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client'; // Corrected import path
+import { createClient } from '@/utils/supabase/client';
+import { useResumeStore } from '@/store/useResumeStore';
+import {compile } from '@/components/Templates';
+import axios from 'axios';
 
-const supabase = createClient();
-
-export default function Home() {
+export default function Home({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const [activeView, setActiveView] = useState<boolean>(false);
-  const router = useRouter();
+  const { resume, fetchResume, updateMarkdown, updateHtml, loading } = useResumeStore();
+  const [supabase, setSupabase] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Initialize Supabase client only on the client side
+    setSupabase(createClient());
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadResume = async () => {
+      if (!resolvedParams.id) return;
+      
+      try {
+        await fetchResume(resolvedParams.id);
+        if (!isMounted) return;
+      } catch (err) {
+        if (!isMounted) return;
+        console.error('Error fetching resume:', err);
+        setError('Failed to load resume data');
+      }
+    };
+    
+    loadResume();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [resolvedParams.id, fetchResume]);
+
+  useEffect(() => {
+    if (!resume) return;
+    if (resume?.markdown?.length > 0) return;
+    const fetchData = async () => {
+      if (resume?.name?.length > 0 && resume?.role?.length > 0) {
+        try {
+          setIsLoading(true);
+          const comRes = await axios.post('/api/completion/manual', { name: resume.name, role: resume.role });
+          const markdown = comRes.data.markdown;
+          const html = await compile(markdown, 'base');
+          
+          // Batch state updates
+          updateMarkdown(markdown);
+          updateHtml(html);
+        } catch (error) {
+          console.error('Error communicating with AI:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+  }, [resume]);
 
   const handlePrint = () => {
     const iframe = document.querySelector('iframe');
@@ -28,13 +85,24 @@ export default function Home() {
   };
 
   const handleLogout = async () => {
+    if (!supabase) return;
+    
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error logging out:', error.message);
     } else {
-      router.push('/login'); // Redirect to the login page
+      window.location.href = '/login';
     }
   };
+
+  if (error) {
+    return <div className="flex h-screen items-center justify-center bg-slate-800 text-white">Error: {error}</div>;
+  }
+
+  if (loading || !resume) {
+    return <div className="flex h-screen items-center justify-center bg-slate-800 text-white">Loading...</div>;
+  }
+  
 
   return (
     <LatexProvider>
@@ -103,7 +171,7 @@ export default function Home() {
 
           {/* View */}
           <div className="flex-1 overflow-auto bg-gray-100 rounded-xl mb-3 mr-3">
-            {activeView ? <Editor /> : <ResumePreview />}
+            {isLoading ? <div className="flex h-full items-center justify-center bg-slate-200 text-white">Loading...</div> : activeView ? <Editor /> : <ResumePreview />}
           </div>
         </div>
       </main>

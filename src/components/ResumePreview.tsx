@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useLatexContext } from '@/context/LatexContext';
 import { compile } from '@/components/Templates';
 import axios from 'axios';
+import { useResumeStore } from '@/store/useResumeStore';
 
 const ResumePreview: React.FC = () => {
-    const { latex, templateName, renderedHtml, setRenderedHtml, userData, setUserData, setLatex } = useLatexContext();
-    const [resumeHtml, setResumeHtml] = useState(renderedHtml || '');
     const [isLoading, setIsLoading] = useState(false);
     const resumePreviewRef = useRef<HTMLIFrameElement>(null);
+    const { resume, updateMarkdown, updateHtml } = useResumeStore();
 
     const handlePrint = () => {
         if (resumePreviewRef.current) {
@@ -15,52 +14,9 @@ const ResumePreview: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (userData?.isNew) {
-                try {
-                    setIsLoading(true); // Start loader
-                    const comRes = await axios.post('/api/completion/manual', { name: userData.name, role: userData.role });
-                    setLatex(comRes.data.markdown);
-                } catch (error) {
-                    console.error('Error communicating with AI:', error);
 
-                } finally {
-                    setIsLoading(false); // Stop loader
-                    setUserData({ ...userData, isNew: false });
-                }
-            }
-        }
-        fetchData();
-    }, [userData])
 
-    useEffect(() => {
-        if (!latex.length) {
-            return;
-        }
 
-        const fetchRenderedTemplate = async () => {
-            setIsLoading(true); // Start loader
-            const storedLatex = window.localStorage.getItem('latex');
-            const storedTemplateName = window.localStorage.getItem('templateName');
-            const storedHtml = window.localStorage.getItem('renderedHtml');
-
-            // Check if stored values match current values
-            if (storedLatex === latex && storedTemplateName === templateName && storedHtml) {
-                setResumeHtml(storedHtml); // Use stored HTML
-                setIsLoading(false); // Stop loader
-                return;
-            }
-
-            // Call render API if values don't match
-            const result = await compile(latex, templateName);
-            setResumeHtml(result);
-            setRenderedHtml(result);
-            setIsLoading(false); // Stop loader
-        };
-
-        fetchRenderedTemplate();
-    }, [latex, templateName]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -87,10 +43,10 @@ const ResumePreview: React.FC = () => {
 
                     </div>
                 ) : (
-                    !!resumeHtml.length && (
+                    resume?.renderedHtml && !!resume?.renderedHtml.length && (
                         <iframe
                             ref={resumePreviewRef}
-                            srcDoc={resumeHtml}
+                            srcDoc={resume?.renderedHtml}
                             className="w-[793px] h-full border-none print:block"
                         />
                     )

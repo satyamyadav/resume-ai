@@ -80,21 +80,24 @@ const defaultMessages: Message[] = [
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const res = await fetch(`${process.env.TOGETHER_API_URL}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ model: `${process.env.TOGETHER_API_MODEL}`, messages: [...defaultMessages, ...messages] }),
+  // Update the fetch call to use the "completions" endpoint
+  const res = await fetch("http://localhost:11434/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "mistral",
+      messages:  [...defaultMessages,  ...messages],
+      stream: false
+    })
   });
 
   const data = await res.json();
-  console.log(data);
+
+  console.log(data.message);
   try {
-    return NextResponse.json({ reply: data.choices[0].message.content });
+    return NextResponse.json({ reply: data.message.content });
   } catch (error) {
-    console.error('Error communicating with AI:', error);
+    console.error('Error communicating with local Mistral model:', error);
     return NextResponse.error();
   }
 }

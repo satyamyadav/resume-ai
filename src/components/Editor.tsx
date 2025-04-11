@@ -5,11 +5,15 @@ import React, { useEffect, useRef } from "react";
 import { ResumeFormProps } from "../types";
 import { Editor as ToastEditor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import { useResumeStore } from '@/store/useResumeStore';
 
-const ResumeForm: React.FC<ResumeFormProps> = () => {
+
+const ResumeForm: React.FC = () => {
   const editorRef = useRef<ToastEditor>(null);
-  const { latex, setLatex } = useLatexContext();
-
+  // const { latex, setLatex } = useLatexContext();
+  const { resume, updateMarkdown } = useResumeStore();
+  const { markdown: latex } = resume;
+  
   useEffect(() => {
     if (latex && editorRef.current) {
       editorRef.current.getInstance().setMarkdown(latex);
@@ -23,7 +27,7 @@ const ResumeForm: React.FC<ResumeFormProps> = () => {
 
   const handleRunClick = () => {
     const value = editorRef.current?.getInstance().getMarkdown() || "";
-    setLatex(value);
+    // setLatex(value);
   };
 
   return (
